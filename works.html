@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Works — Jagadish Bananki</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Space+Mono&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --bg: #0a0a0a; --silver: #e0e0e0; --accent: #ff3c00; --grain-opacity: 0.15; }
+    html { scroll-behavior: smooth; }
+    body { background-color: var(--bg); color: var(--silver); font-family: 'Syncopate', sans-serif; overflow-x: hidden; }
+
+    .halide-grain { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 200; opacity: var(--grain-opacity); filter: url(#grain); }
+
+    .nav { position: fixed; top: 0; left: 0; right: 0; padding: 2.5rem 4rem; display: flex; justify-content: space-between; align-items: flex-start; z-index: 300; pointer-events: none; }
+    .brand { font-weight: 700; font-size: 0.75rem; letter-spacing: 0.2em; }
+    .brand a { color: var(--silver); text-decoration: none; pointer-events: auto; }
+    .brand a:hover { opacity: 0.6; }
+    .nav-links { text-align: right; font-family: 'Space Mono', monospace; font-size: 0.7rem; line-height: 2; pointer-events: auto; }
+    .nav-links a { display: block; color: var(--accent); text-decoration: none; letter-spacing: 0.15em; transition: opacity 0.2s; }
+    .nav-links a:hover { opacity: 0.6; }
+    .nav-links a.active { border-bottom: 1px solid var(--accent); }
+
+    .page-hero {
+      position: relative; width: 100vw; height: 40vh; min-height: 260px;
+      display: flex; align-items: flex-end; overflow: hidden; background-color: var(--bg);
+    }
+    .page-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background-image:
+        repeating-radial-gradient(circle at 70% 40%, transparent 0, transparent 60px, rgba(255,255,255,0.04) 61px, transparent 62px),
+        repeating-linear-gradient(0deg, transparent, transparent 79px, rgba(255,255,255,0.02) 80px),
+        repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(255,255,255,0.02) 80px);
+    }
+    .page-hero-inner { position: relative; z-index: 2; padding: 4rem; width: 100%; }
+    .page-label { font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 0.3em; color: var(--accent); margin-bottom: 1rem; }
+    .page-title { font-size: clamp(3rem, 8vw, 7rem); font-weight: 700; letter-spacing: -0.04em; line-height: 0.85; }
+
+    .section-divider { width: 100%; height: 1px; background: rgba(224,224,224,0.08); }
+
+    .section { position: relative; width: 100vw; background-color: var(--bg); overflow: hidden; }
+    .section::before {
+      content: ''; position: absolute; inset: 0;
+      background-image:
+        repeating-radial-gradient(circle at 50% 50%, transparent 0, transparent 60px, rgba(255,255,255,0.03) 61px, transparent 62px),
+        repeating-linear-gradient(0deg, transparent, transparent 79px, rgba(255,255,255,0.02) 80px),
+        repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(255,255,255,0.02) 80px);
+      pointer-events: none;
+    }
+    .section-inner { position: relative; z-index: 2; max-width: 1200px; width: 100%; padding: 6rem 4rem; margin: 0 auto; }
+    .section-subtitle { font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 0.3em; color: var(--accent); margin-bottom: 2rem; }
+    .section-heading {
+      font-size: clamp(1.5rem, 3vw, 2.5rem); font-weight: 700; letter-spacing: -0.03em; line-height: 0.9;
+      margin-bottom: 3rem; border-bottom: 1px solid rgba(224,224,224,0.1); padding-bottom: 2rem;
+    }
+
+    /* ── Expandable gallery (RECENT section) ── */
+    .exp-gallery {
+      display: flex;
+      gap: 4px;
+      height: 420px;
+      width: 100%;
+      margin-bottom: 0.5rem;
+    }
+
+    .exp-item {
+      position: relative;
+      flex: 1;
+      overflow: hidden;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: flex 0.55s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    .exp-item:hover { flex: 2.2; }
+    .exp-item:hover ~ .exp-item,
+    .exp-gallery:has(.exp-item:hover) .exp-item:not(:hover) { flex: 0.45; }
+
+    .exp-item img {
+      position: absolute;
+      inset: 0; width: 100%; height: 100%;
+      object-fit: cover;
+      filter: grayscale(0.6) contrast(1.1) brightness(0.85);
+      transition: filter 0.4s;
+      pointer-events: none;
+    }
+    .exp-item:hover img { filter: grayscale(0.15) contrast(1.1) brightness(0.95); }
+
+    /* Dark overlay that fades on hover */
+    .exp-item::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.3);
+      transition: opacity 0.35s;
+      pointer-events: none;
+    }
+    .exp-item:hover::after { opacity: 0; }
+
+    /* Caption shown on hover */
+    .exp-caption {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 1.2rem 1.2rem 1rem;
+      z-index: 2;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.35s, transform 0.35s cubic-bezier(0.16,1,0.3,1);
+    }
+    .exp-item:hover .exp-caption {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .exp-caption .w-title { font-family: 'Syncopate', sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; color: #fff; margin-bottom: 0.2rem; }
+    .exp-caption .w-sub   { font-family: 'Space Mono', monospace; font-size: 0.55rem; color: rgba(255,255,255,0.55); margin-bottom: 0.2rem; }
+    .exp-caption .w-medium{ font-family: 'Space Mono', monospace; font-size: 0.55rem; color: rgba(255,255,255,0.9); }
+
+    /* Progressive blur on exp-item */
+    .exp-blur-overlay { position: absolute; bottom: 0; left: 0; width: 100%; height: 55%; pointer-events: none; border-radius: inherit; }
+    .exp-blur-overlay .blur-layer:nth-child(1) { backdrop-filter: blur(0px);    -webkit-backdrop-filter: blur(0px);    mask-image: linear-gradient(180deg, rgba(255,255,255,0) 0%,  rgba(255,255,255,1) 11%, rgba(255,255,255,1) 22%, rgba(255,255,255,0) 33%); -webkit-mask-image: linear-gradient(180deg, rgba(255,255,255,0) 0%,  rgba(255,255,255,1) 11%, rgba(255,255,255,1) 22%, rgba(255,255,255,0) 33%); }
+    .exp-blur-overlay .blur-layer:nth-child(2) { backdrop-filter: blur(0.25px); -webkit-backdrop-filter: blur(0.25px); mask-image: linear-gradient(180deg, rgba(255,255,255,0) 11%, rgba(255,255,255,1) 22%, rgba(255,255,255,1) 33%, rgba(255,255,255,0) 44%); -webkit-mask-image: linear-gradient(180deg, rgba(255,255,255,0) 11%, rgba(255,255,255,1) 22%, rgba(255,255,255,1) 33%, rgba(255,255,255,0) 44%); }
+    .exp-blur-overlay .blur-layer:nth-child(3) { backdrop-filter: blur(0.75px); -webkit-backdrop-filter: blur(0.75px); mask-image: linear-gradient(180deg, rgba(255,255,255,0) 22%, rgba(255,255,255,1) 33%, rgba(255,255,255,1) 44%, rgba(255,255,255,0) 55%); -webkit-mask-image: linear-gradient(180deg, rgba(255,255,255,0) 22%, rgba(255,255,255,1) 33%, rgba(255,255,255,1) 44%, rgba(255,255,255,0) 55%); }
+    .exp-blur-overlay .blur-layer:nth-child(4) { backdrop-filter: blur(1.5px);  -webkit-backdrop-filter: blur(1.5px);  mask-image: linear-gradient(180deg, rgba(255,255,255,0) 33%, rgba(255,255,255,1) 44%, rgba(255,255,255,1) 55%, rgba(255,255,255,0) 66%); -webkit-mask-image: linear-gradient(180deg, rgba(255,255,255,0) 33%, rgba(255,255,255,1) 44%, rgba(255,255,255,1) 55%, rgba(255,255,255,0) 66%); }
+    .exp-blur-overlay .blur-layer:nth-child(5) { backdrop-filter: blur(2.5px);  -webkit-backdrop-filter: blur(2.5px);  mask-image: linear-gradient(180deg, rgba(255,255,255,0) 44%, rgba(255,255,255,1) 55%, rgba(255,255,255,1) 66%, rgba(255,255,255,0) 77%); -webkit-mask-image: linear-gradient(180deg, rgba(255,255,255,0) 44%, rgba(255,255,255,1) 55%, rgba(255,255,255,1) 66%, rgba(255,255,255,0) 77%); }
+    .exp-blur-overlay .blur-layer:nth-child(6) { backdrop-filter: blur(4px);    -webkit-backdrop-filter: blur(4px);    mask-image: linear-gradient(180deg, rgba(255,255,255,0) 55%, rgba(255,255,255,1) 66%, rgba(255,255,255,1) 77%, rgba(255,255,255,0) 88%); -webkit-mask-image: linear-gradient(180deg, rgba(255,255,255,0) 55%, rgba(255,255,255,1) 66%, rgba(255,255,255,1) 77%, rgba(255,255,255,0) 88%); }
+    .exp-blur-overlay .blur-layer:nth-child(7) { backdrop-filter: blur(6px);    -webkit-backdrop-filter: blur(6px);    mask-image: linear-gradient(180deg, rgba(255,255,255,0) 66%, rgba(255,255,255,1) 77%, rgba(255,255,255,1) 88%, rgba(255,255,255,0) 100%); -webkit-mask-image: linear-gradient(180deg, rgba(255,255,255,0) 66%, rgba(255,255,255,1) 77%, rgba(255,255,255,1) 88%, rgba(255,255,255,0) 100%); }
+    .exp-blur-overlay .blur-layer:nth-child(8) { backdrop-filter: blur(9px);    -webkit-backdrop-filter: blur(9px);    mask-image: linear-gradient(180deg, rgba(255,255,255,0) 77%, rgba(255,255,255,1) 88%, rgba(255,255,255,1) 100%, rgba(255,255,255,0) 100%); -webkit-mask-image: linear-gradient(180deg, rgba(255,255,255,0) 77%, rgba(255,255,255,1) 88%, rgba(255,255,255,1) 100%, rgba(255,255,255,0) 100%); }
+
+    /* ── Lightbox modal ── */
+    .lightbox {
+      position: fixed; inset: 0; z-index: 450;
+      background: rgba(10,10,10,0.96);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .lightbox.open { opacity: 1; pointer-events: auto; }
+
+    .lightbox-img-wrap {
+      position: relative;
+      max-width: min(90vw, 1100px);
+      max-height: 90vh;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .lightbox-img-wrap img {
+      max-width: 100%; max-height: 90vh;
+      object-fit: contain; border-radius: 2px;
+      transform: scale(0.88); opacity: 0;
+      transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), opacity 0.3s;
+    }
+    .lightbox.open .lightbox-img-wrap img { transform: scale(1); opacity: 1; }
+
+    .lb-btn {
+      position: fixed;
+      top: 50%; transform: translateY(-50%);
+      background: none; border: 1px solid rgba(224,224,224,0.2);
+      color: var(--silver); width: 2.8rem; height: 2.8rem;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; z-index: 10;
+      transition: border-color 0.2s, color 0.2s;
+      font-size: 1.1rem; font-family: 'Space Mono', monospace;
+    }
+    .lb-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .lb-prev { left: 2rem; }
+    .lb-next { right: 2rem; }
+
+    .lb-close {
+      position: fixed; top: 2rem; right: 2.5rem;
+      background: none; border: 1px solid rgba(224,224,224,0.2);
+      color: var(--silver); font-family: 'Space Mono', monospace;
+      font-size: 0.65rem; letter-spacing: 0.2em;
+      padding: 0.5rem 1rem; cursor: pointer; z-index: 10;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .lb-close:hover { border-color: var(--accent); color: var(--accent); }
+
+    .lb-counter {
+      position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
+      font-family: 'Space Mono', monospace; font-size: 0.6rem;
+      letter-spacing: 0.2em; color: rgba(224,224,224,0.4);
+    }
+
+    /* ── Work card (PAINTINGS & SCULPTURES) ── */
+    .works-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+
+    .work-card {
+      position: relative; aspect-ratio: 1; overflow: hidden;
+      cursor: pointer; border-radius: 2px;
+    }
+    .work-card img {
+      position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+      filter: grayscale(0.6) contrast(1.1) brightness(0.85);
+      transition: transform 0.6s cubic-bezier(0.16,1,0.3,1), filter 0.4s;
+    }
+    .work-card:hover img { transform: scale(1.05); filter: grayscale(0.2) contrast(1.1) brightness(0.9); }
+
+    /* Progressive blur */
+    .blur-overlay { position: absolute; bottom: 0; left: 0; width: 100%; height: 55%; pointer-events: none; border-radius: inherit; }
+    .blur-layer { position: absolute; inset: 0; border-radius: inherit; }
+    .blur-layer:nth-child(1) { backdrop-filter: blur(0px);    -webkit-backdrop-filter: blur(0px);    mask-image: linear-gradient(180deg, rgba(255,255,255,0) 0%,  rgba(255,255,255,1) 11%, rgba(255,255,255,1) 22%, rgba(255,255,255,0) 33%); -webkit-mask-image: linear-gradient(180deg, rgba(255,255,255,0) 0%,  rgba(255,255,255,1) 11%, rgba(255,255,255,1) 22%, rgba(255,255,255,0) 33%); }
+    .blur-layer:nth-child(2) { backdrop-filter: blur(0.25px); -webkit-backdrop-filter: blur(0.25px); mask-image: linear-gradient(180deg, rgba(255,255,255,0) 11%, rgba(255,255,255,1) 22%, rgba(255,255,255,1) 33%, rgba(255,255,255,0) 44%); -webkit-mask-image: linear-gradient(180deg, rgba(255,255,255,0) 11%, rgba(255,255,255,1) 22%, rgba(255,255,255,1) 33%, rgba(255,255,255,0) 44%); }
+    .blur-layer:nth-child(3) { backdrop-filter: blur(0.75px); -webkit-backdrop-filter: blur(0.75px); mask-image: linear-gradient(180deg, rgba(255,255,255,0) 22%, rgba(255,255,255,1) 33%, rgba(255,255,255,1) 44%, rgba(255,255,255,0) 55%); -webkit-mask-image: linear-gradient(180deg, rgba(255,255,255,0) 22%, rgba(255,255,255,1) 33%, rgba(255,255,255,1) 44%, rgba(255,255,255,0) 55%); }
+    .blur-layer:nth-child(4) { backdrop-filter: blur(1.5px);  -webkit-backdrop-filter: blur(1.5px);  mask-image: linear-gradient(180deg, rgba(255,255,255,0) 33%, rgba(255,255,255,1) 44%, rgba(255,255,255,1) 55%, rgba(255,255,255,0) 66%); -webkit-mask-image: linear-gradient(180deg, rgba(255,255,255,0) 33%, rgba(255,255,255,1) 44%, rgba(255,255,255,1) 55%, rgba(255,255,255,0) 66%); }
+    .blur-layer:nth-child(5) { backdrop-filter: blur(2.5px);  -webkit-backdrop-filter: blur(2.5px);  mask-image: linear-gradient(180deg, rgba(255,255,255,0) 44%, rgba(255,255,255,1) 55%, rgba(255,255,255,1) 66%, rgba(255,255,255,0) 77%); -webkit-mask-image: linear-gradient(180deg, rgba(255,255,255,0) 44%, rgba(255,255,255,1) 55%, rgba(255,255,255,1) 66%, rgba(255,255,255,0) 77%); }
+    .blur-layer:nth-child(6) { backdrop-filter: blur(4px);    -webkit-backdrop-filter: blur(4px);    mask-image: linear-gradient(180deg, rgba(255,255,255,0) 55%, rgba(255,255,255,1) 66%, rgba(255,255,255,1) 77%, rgba(255,255,255,0) 88%); -webkit-mask-image: linear-gradient(180deg, rgba(255,255,255,0) 55%, rgba(255,255,255,1) 66%, rgba(255,255,255,1) 77%, rgba(255,255,255,0) 88%); }
+    .blur-layer:nth-child(7) { backdrop-filter: blur(6px);    -webkit-backdrop-filter: blur(6px);    mask-image: linear-gradient(180deg, rgba(255,255,255,0) 66%, rgba(255,255,255,1) 77%, rgba(255,255,255,1) 88%, rgba(255,255,255,0) 100%); -webkit-mask-image: linear-gradient(180deg, rgba(255,255,255,0) 66%, rgba(255,255,255,1) 77%, rgba(255,255,255,1) 88%, rgba(255,255,255,0) 100%); }
+    .blur-layer:nth-child(8) { backdrop-filter: blur(9px);    -webkit-backdrop-filter: blur(9px);    mask-image: linear-gradient(180deg, rgba(255,255,255,0) 77%, rgba(255,255,255,1) 88%, rgba(255,255,255,1) 100%, rgba(255,255,255,0) 100%); -webkit-mask-image: linear-gradient(180deg, rgba(255,255,255,0) 77%, rgba(255,255,255,1) 88%, rgba(255,255,255,1) 100%, rgba(255,255,255,0) 100%); }
+
+    .work-caption { position: absolute; bottom: 0; left: 0; padding: 1.2rem 1.2rem 1rem; z-index: 2; }
+    .work-caption .w-title { font-family: 'Syncopate', sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; color: #fff; margin-bottom: 0.2rem; }
+    .work-caption .w-sub   { font-family: 'Space Mono', monospace; font-size: 0.55rem; color: rgba(255,255,255,0.55); margin-bottom: 0.2rem; }
+    .work-caption .w-medium{ font-family: 'Space Mono', monospace; font-size: 0.55rem; color: rgba(255,255,255,0.9); }
+
+    /* ── Detail panel (full-screen overlay) ── */
+    .detail-panel {
+      position: fixed;
+      inset: 0;
+      z-index: 400;
+      display: flex;
+      background: var(--bg);
+      transform: translateY(100%);
+      transition: transform 0.65s cubic-bezier(0.16,1,0.3,1);
+      overflow: hidden;
+    }
+    .detail-panel.open { transform: translateY(0); }
+
+    /* Left — image */
+    .detail-image-wrap {
+      flex: 0 0 55%;
+      position: relative;
+      overflow: hidden;
+    }
+    .detail-image-wrap img {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover;
+      filter: grayscale(0.3) contrast(1.1) brightness(0.9);
+      transition: transform 0.8s cubic-bezier(0.16,1,0.3,1);
+    }
+    .detail-panel.open .detail-image-wrap img { transform: scale(1.03); }
+
+    /* Right — info */
+    .detail-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 6rem 4rem;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .detail-close {
+      position: absolute;
+      top: 2.5rem; right: 3rem;
+      background: none;
+      border: 1px solid rgba(224,224,224,0.2);
+      color: var(--silver);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .detail-close:hover { border-color: var(--accent); color: var(--accent); }
+
+    .detail-label { font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 0.3em; color: var(--accent); margin-bottom: 1.5rem; }
+    .detail-title { font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 700; letter-spacing: -0.04em; line-height: 0.9; margin-bottom: 0.75rem; }
+    .detail-year  { font-family: 'Space Mono', monospace; font-size: 0.7rem; color: rgba(224,224,224,0.4); margin-bottom: 2.5rem; letter-spacing: 0.1em; }
+
+    .detail-divider { width: 2rem; height: 1px; background: var(--accent); margin-bottom: 2rem; }
+
+    .detail-meta { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 2.5rem; }
+    .detail-meta-row { display: flex; gap: 1.5rem; font-family: 'Space Mono', monospace; font-size: 0.65rem; }
+    .detail-meta-key { color: rgba(224,224,224,0.35); min-width: 90px; letter-spacing: 0.1em; }
+    .detail-meta-val { color: var(--silver); }
+
+    .detail-desc {
+      font-family: 'Space Mono', monospace; font-size: 0.72rem; line-height: 2;
+      color: rgba(224,224,224,0.55); max-width: 420px;
+    }
+  </style>
+<body>
+
+  <svg style="position:absolute;width:0;height:0">
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" />
+      <feColorMatrix type="saturate" values="0" />
+    </filter>
+  </svg>
+  <div class="halide-grain"></div>
+
+  <nav class="nav">
+    <div class="brand"><a href="index.html">ARTIST | SCULPTOR</a></div>
+    <div class="nav-links">
+      <a href="about.html">ABOUT THE ARTIST</a>
+      <a href="works.html" class="active">WORKS</a>
+      <a href="exhibitions.html">EXHIBITIONS</a>
+      <a href="events.html">EVENTS, PRESS &amp; MEDIA</a>
+      <a href="index.html#contact">CONTACT</a>
+    </div>
+  </nav>
+
+  <!-- ── Detail panel ── -->
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-image-wrap">
+      <img id="detailImg" src="" alt="" />
+    </div>
+    <div class="detail-info">
+      <button class="detail-close" id="detailClose">✕ CLOSE</button>
+      <p class="detail-label" id="detailLabel"></p>
+      <h2 class="detail-title" id="detailTitle"></h2>
+      <p class="detail-year"  id="detailYear"></p>
+      <div class="detail-divider"></div>
+      <div class="detail-meta" id="detailMeta"></div>
+      <p class="detail-desc"  id="detailDesc"></p>
+    </div>
+  </div>
+
+  <div class="page-hero">
+    <div class="page-hero-inner">
+      <p class="page-label">[ SELECTED WORKS ]</p>
+      <h1 class="page-title">WORKS</h1>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox">
+    <button class="lb-close" id="lbClose">✕ CLOSE</button>
+    <button class="lb-btn lb-prev" id="lbPrev">&#8592;</button>
+    <div class="lightbox-img-wrap">
+      <img id="lbImg" src="" alt="" />
+    </div>
+    <button class="lb-btn lb-next" id="lbNext">&#8594;</button>
+    <div class="lb-counter" id="lbCounter"></div>
+  </div>
+
+  <!-- Recent -->
+  <section class="section">
+    <div class="section-inner">
+      <p class="section-subtitle">[ 2024 — 2026 ]</p>
+      <h2 class="section-heading">RECENT</h2>
+
+      <div class="exp-gallery" id="expGallery">
+
+        <div class="exp-item" data-id="1">
+          <img src="https://images.unsplash.com/photo-1554907984-15263bfd63bd?auto=format&fit=crop&q=80&w=1000" alt="Form I" />
+          <div class="exp-blur-overlay"><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div></div>
+          <div class="exp-caption"><p class="w-title">FORM I</p><p class="w-sub">2026</p><p class="w-medium">Stone, Steel</p></div>
+        </div>
+
+        <div class="exp-item" data-id="2">
+          <img src="https://images.unsplash.com/photo-1524413840807-0c3cb6fa808d?auto=format&fit=crop&q=80&w=1000" alt="Form II" />
+          <div class="exp-blur-overlay"><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div></div>
+          <div class="exp-caption"><p class="w-title">FORM II</p><p class="w-sub">2025</p><p class="w-medium">Cast Iron</p></div>
+        </div>
+
+        <div class="exp-item" data-id="3">
+          <img src="https://images.unsplash.com/photo-1549490349-8643362247b5?auto=format&fit=crop&q=80&w=1000" alt="Void IV" />
+          <div class="exp-blur-overlay"><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div></div>
+          <div class="exp-caption"><p class="w-title">VOID IV</p><p class="w-sub">2024</p><p class="w-medium">Bronze</p></div>
+        </div>
+
+        <div class="exp-item" data-id="4">
+          <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&q=80&w=1000" alt="Terrain V" />
+          <div class="exp-blur-overlay"><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div></div>
+          <div class="exp-caption"><p class="w-title">TERRAIN V</p><p class="w-sub">2024</p><p class="w-medium">Sandstone</p></div>
+        </div>
+
+        <div class="exp-item" data-id="5">
+          <img src="https://images.unsplash.com/photo-1518998053901-5348d3961a04?auto=format&fit=crop&q=80&w=1000" alt="Stratum VI" />
+          <div class="exp-blur-overlay"><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div></div>
+          <div class="exp-caption"><p class="w-title">STRATUM VI</p><p class="w-sub">2024</p><p class="w-medium">Mixed Media</p></div>
+        </div>
+
+        <div class="exp-item" data-id="6">
+          <img src="https://images.unsplash.com/photo-1580136579312-94651dfd596d?auto=format&fit=crop&q=80&w=1000" alt="Form III" />
+          <div class="exp-blur-overlay"><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div></div>
+          <div class="exp-caption"><p class="w-title">FORM III</p><p class="w-sub">2025</p><p class="w-medium">Marble</p></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- Paintings -->
+  <section class="section">
+    <div class="section-inner">
+      <p class="section-subtitle">[ OIL, ACRYLIC &amp; MIXED MEDIA ON CANVAS ]</p>
+      <h2 class="section-heading">PAINTINGS</h2>
+      <div class="works-grid">
+
+        <div class="work-card" data-id="7">
+          <img src="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=800" alt="Ochre Field" />
+          <div class="blur-overlay"><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div></div>
+          <div class="work-caption"><p class="w-title">OCHRE FIELD</p><p class="w-sub">2025</p><p class="w-medium">Oil on Canvas</p></div>
+        </div>
+
+        <div class="work-card" data-id="8">
+          <img src="https://images.unsplash.com/photo-1549887534-1541e9326642?auto=format&fit=crop&q=80&w=800" alt="Oxide Study I" />
+          <div class="blur-overlay"><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div></div>
+          <div class="work-caption"><p class="w-title">OXIDE STUDY I</p><p class="w-sub">2024</p><p class="w-medium">Acrylic on Canvas</p></div>
+        </div>
+
+        <div class="work-card" data-id="9">
+          <img src="https://images.unsplash.com/photo-1541961017774-22349e4a1262?auto=format&fit=crop&q=80&w=800" alt="Mineral Black" />
+          <div class="blur-overlay"><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div></div>
+          <div class="work-caption"><p class="w-title">MINERAL BLACK</p><p class="w-sub">2024</p><p class="w-medium">Oil on Linen</p></div>
+        </div>
+
+        <div class="work-card" data-id="10">
+          <img src="https://images.unsplash.com/photo-1561214115-f2f134cc4912?auto=format&fit=crop&q=80&w=800" alt="Sediment I" />
+          <div class="blur-overlay"><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div></div>
+          <div class="work-caption"><p class="w-title">SEDIMENT I</p><p class="w-sub">2023</p><p class="w-medium">Mixed Media on Board</p></div>
+        </div>
+
+        <div class="work-card" data-id="11">
+          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=800" alt="Graphite Horizon" />
+          <div class="blur-overlay"><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div></div>
+          <div class="work-caption"><p class="w-title">GRAPHITE HORIZON</p><p class="w-sub">2023</p><p class="w-medium">Graphite on Paper</p></div>
+        </div>
+
+        <div class="work-card" data-id="12">
+          <img src="https://images.unsplash.com/photo-1567095761054-7a02e69e5c43?auto=format&fit=crop&q=80&w=800" alt="Ash Study" />
+          <div class="blur-overlay"><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div></div>
+          <div class="work-caption"><p class="w-title">ASH STUDY</p><p class="w-sub">2022</p><p class="w-medium">Charcoal on Canvas</p></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- Sculptures -->
+  <section class="section">
+    <div class="section-inner">
+      <p class="section-subtitle">[ STONE, BRONZE, STEEL &amp; MIXED MEDIA ]</p>
+      <h2 class="section-heading">SCULPTURES</h2>
+      <div class="works-grid">
+
+        <div class="work-card" data-id="13">
+          <img src="https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?auto=format&fit=crop&q=80&w=800" alt="Surface VII" />
+          <div class="blur-overlay"><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div></div>
+          <div class="work-caption"><p class="w-title">SURFACE VII</p><p class="w-sub">2022</p><p class="w-medium">Granite</p></div>
+        </div>
+
+        <div class="work-card" data-id="14">
+          <img src="https://images.unsplash.com/photo-1574182245530-967d9b3831af?auto=format&fit=crop&q=80&w=800" alt="Archive IX" />
+          <div class="blur-overlay"><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div></div>
+          <div class="work-caption"><p class="w-title">ARCHIVE IX</p><p class="w-sub">2020</p><p class="w-medium">Bronze</p></div>
+        </div>
+
+        <div class="work-card" data-id="15">
+          <img src="https://images.unsplash.com/photo-1545987796-200677ee1011?auto=format&fit=crop&q=80&w=800" alt="Light X" />
+          <div class="blur-overlay"><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div></div>
+          <div class="work-caption"><p class="w-title">LIGHT X</p><p class="w-sub">2019</p><p class="w-medium">Glass, Iron</p></div>
+        </div>
+
+        <div class="work-card" data-id="16">
+          <img src="https://images.unsplash.com/photo-1551913902-c92207136625?auto=format&fit=crop&q=80&w=800" alt="Mass XI" />
+          <div class="blur-overlay"><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div></div>
+          <div class="work-caption"><p class="w-title">MASS XI</p><p class="w-sub">2019</p><p class="w-medium">Stone</p></div>
+        </div>
+
+        <div class="work-card" data-id="17">
+          <img src="https://images.unsplash.com/photo-1580136579312-94651dfd596d?auto=format&fit=crop&q=80&w=800" alt="Depth VIII" />
+          <div class="blur-overlay"><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div></div>
+          <div class="work-caption"><p class="w-title">DEPTH VIII</p><p class="w-sub">2021</p><p class="w-medium">Steel</p></div>
+        </div>
+
+        <div class="work-card" data-id="18">
+          <img src="https://images.unsplash.com/photo-1554907984-15263bfd63bd?auto=format&fit=crop&q=80&w=800" alt="Ground XII" />
+          <div class="blur-overlay"><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div><div class="blur-layer"></div></div>
+          <div class="work-caption"><p class="w-title">GROUND XII</p><p class="w-sub">2018</p><p class="w-medium">Mixed Media</p></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const works = {
+      // Recent
+      1:  { title: 'FORM I',          year: '2026', label: '[ RECENT — 01 ]',    medium: 'Stone, Steel',          dimensions: '180 × 60 × 40 cm',   location: 'Private Collection, Berlin',       img: 'https://images.unsplash.com/photo-1554907984-15263bfd63bd?auto=format&fit=crop&q=80&w=1400',  desc: 'Form I initiates a dialogue between geological weight and engineered tension. Cast steel rods pierce a monolithic block of local sandstone, each rod angled along stress lines computed from the stone\'s natural fracture map. The work asks whether structure is found or imposed — whether the steel reveals latent order in the stone, or violates it.' },
+      2:  { title: 'FORM II',         year: '2025', label: '[ RECENT — 02 ]',    medium: 'Cast Iron',             dimensions: '95 × 95 × 120 cm',   location: 'Studio Collection, Hyderabad',     img: 'https://images.unsplash.com/photo-1524413840807-0c3cb6fa808d?auto=format&fit=crop&q=80&w=1400', desc: 'A cast iron column that records the memory of heat. Poured in a single session over eighteen hours, the surface bears the trace of cooling — contraction lines, oxide blooms, and the irregular topography of a material transitioning from fluid to solid. Form II is a document of time compressed into object.' },
+      3:  { title: 'VOID IV',         year: '2024', label: '[ RECENT — 03 ]',    medium: 'Bronze',                dimensions: '40 × 40 × 85 cm',    location: 'Kunsthalle Basel',                 img: 'https://images.unsplash.com/photo-1549490349-8643362247b5?auto=format&fit=crop&q=80&w=1400',  desc: 'Void IV is a hollow bronze casting whose interior volume is its primary subject. The outer shell is thin, almost membrane-like, and the work is designed to be experienced by moving around it — the shadow cast by its aperture shifts the perceived interior as light changes through the day.' },
+      4:  { title: 'TERRAIN V',       year: '2024', label: '[ RECENT — 04 ]',    medium: 'Sandstone',             dimensions: '200 × 80 × 55 cm',   location: 'Studio Nova, Mumbai',              img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&q=80&w=1400',  desc: 'Terrain V is drawn from topographical survey data of the Deccan Plateau. The surface contours mirror actual elevation data, translated from cartographic abstraction into tactile relief. The work collapses the distance between map and land.' },
+      5:  { title: 'STRATUM VI',      year: '2024', label: '[ RECENT — 05 ]',    medium: 'Mixed Media',           dimensions: '150 × 120 × 30 cm',  location: 'Kochi-Muziris Biennale',           img: 'https://images.unsplash.com/photo-1518998053901-5348d3961a04?auto=format&fit=crop&q=80&w=1400', desc: 'Constructed from compressed layers of reclaimed industrial material — rubber, bitumen, oxide-treated steel mesh, and cast resin — Stratum VI references geological cross-section. Each layer was accumulated over three months, the work growing incrementally.' },
+      6:  { title: 'FORM III',        year: '2025', label: '[ RECENT — 06 ]',    medium: 'Marble',                dimensions: '70 × 45 × 38 cm',    location: 'Whitefield Gallery, London',       img: 'https://images.unsplash.com/photo-1580136579312-94651dfd596d?auto=format&fit=crop&q=80&w=1400',  desc: 'Carved from a single block of Carrara marble, Form III explores the threshold between removal and revelation. Each tool mark is left visible — not as error, but as evidence of process.' },
+      // Paintings
+      7:  { title: 'OCHRE FIELD',     year: '2025', label: '[ PAINTINGS — 01 ]', medium: 'Oil on Canvas',         dimensions: '120 × 90 cm',        location: 'Private Collection, Mumbai',       img: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=1400',  desc: 'Ochre Field is an expansive oil painting drawn from the red laterite soils of the Deccan. Applied in dense, layered strokes with a palette knife, the surface reads simultaneously as landscape and pure material. The ochre pigment is mixed with actual iron oxide collected from the site.' },
+      8:  { title: 'OXIDE STUDY I',   year: '2024', label: '[ PAINTINGS — 02 ]', medium: 'Acrylic on Canvas',     dimensions: '80 × 80 cm',         location: 'Studio Collection, Hyderabad',     img: 'https://images.unsplash.com/photo-1549887534-1541e9326642?auto=format&fit=crop&q=80&w=1400',     desc: 'A meditative study in oxidation — layers of acrylic washed and lifted repeatedly to reveal the accumulated strata beneath. Oxide Study I records time as pigment, each layer a day in the studio, the final surface holding the memory of every previous state.' },
+      9:  { title: 'MINERAL BLACK',   year: '2024', label: '[ PAINTINGS — 03 ]', medium: 'Oil on Linen',          dimensions: '100 × 70 cm',        location: 'Gallery Meridian, Berlin',         img: 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?auto=format&fit=crop&q=80&w=1400',  desc: 'Mineral Black is an oil study of darkness — not as absence, but as density. Painted exclusively in ivory black and bone black with linseed oil, the surface rewards close examination with variations of tone imperceptible from a distance. A painting about what is visible only when approached.' },
+      10: { title: 'SEDIMENT I',      year: '2023', label: '[ PAINTINGS — 04 ]', medium: 'Mixed Media on Board',  dimensions: '60 × 80 cm',         location: 'Devi Art Foundation, Gurugram',    img: 'https://images.unsplash.com/photo-1561214115-f2f134cc4912?auto=format&fit=crop&q=80&w=1400',     desc: 'Sand, pigment, and resin are built up on board in thin, horizontal bands that mimic geological sediment. Sediment I is as much object as image — its surface has measurable relief, and the work changes appearance depending on the raking angle of light.' },
+      11: { title: 'GRAPHITE HORIZON',year: '2023', label: '[ PAINTINGS — 05 ]', medium: 'Graphite on Paper',     dimensions: '200 × 50 cm',        location: 'Private Collection, London',       img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=1400',  desc: 'A single horizontal line, drawn with a graphite stick across a two-metre sheet of paper without lifting the hand. Graphite Horizon is an act of sustained attention — the pressure variation along its length records the physical act of drawing as a continuous event.' },
+      12: { title: 'ASH STUDY',       year: '2022', label: '[ PAINTINGS — 06 ]', medium: 'Charcoal on Canvas',    dimensions: '90 × 70 cm',         location: 'Artist\'s Estate',                 img: 'https://images.unsplash.com/photo-1567095761054-7a02e69e5c43?auto=format&fit=crop&q=80&w=1400',  desc: 'Charcoal drawn and partially erased, repeatedly, until the canvas holds a residue of every mark ever made on it. Ash Study is about the impossibility of erasure — every removal leaves a trace, and the surface accumulates a history that cannot be undone.' },
+      // Sculptures
+      13: { title: 'SURFACE VII',     year: '2022', label: '[ SCULPTURES — 01 ]',medium: 'Granite',               dimensions: '60 × 60 × 90 cm',    location: 'NGMA New Delhi',                   img: 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?auto=format&fit=crop&q=80&w=1400',  desc: 'One face of the granite block is polished to a mirror finish; the opposing face is left raw from the quarry. The work confronts the conventions of finish in sculpture — the assumption that refinement equals intention — and asks what is lost when the original surface is erased.' },
+      14: { title: 'ARCHIVE IX',      year: '2020', label: '[ SCULPTURES — 02 ]',medium: 'Bronze',                dimensions: '55 × 55 × 75 cm',    location: 'Devi Art Foundation, Gurugram',    img: 'https://images.unsplash.com/photo-1574182245530-967d9b3831af?auto=format&fit=crop&q=80&w=1400',  desc: 'Archive IX takes the shape of a cube whose surface has been systematically scarred — each mark corresponding to a date of significance in the artist\'s personal archive. The work translates private time into public surface, making autobiography physical without making it legible.' },
+      15: { title: 'LIGHT X',         year: '2019', label: '[ SCULPTURES — 03 ]',medium: 'Glass, Iron',           dimensions: '40 × 40 × 160 cm',   location: 'Private Collection, Zürich',       img: 'https://images.unsplash.com/photo-1545987796-200677ee1011?auto=format&fit=crop&q=80&w=1400',  desc: 'A vertical iron armature holding seventeen panes of hand-blown glass at irregular intervals. As ambient light shifts, the glass casts changing shadows across the surrounding floor and walls. The sculpture\'s appearance is never fixed — it is completed differently at each hour of the day.' },
+      16: { title: 'MASS XI',         year: '2019', label: '[ SCULPTURES — 04 ]',medium: 'Stone',                 dimensions: '90 × 90 × 40 cm',    location: 'Studio Collection, Hyderabad',     img: 'https://images.unsplash.com/photo-1551913902-c92207136625?auto=format&fit=crop&q=80&w=1400',  desc: 'A flat stone slab, almost featureless, resting directly on the floor. Mass XI refuses the pedestal and the gesture — it is concerned only with weight, presence, and the relationship between an object and the ground it occupies.' },
+      17: { title: 'DEPTH VIII',      year: '2021', label: '[ SCULPTURES — 05 ]',medium: 'Steel',                 dimensions: '120 × 30 × 30 cm',   location: 'Private Collection, London',       img: 'https://images.unsplash.com/photo-1580136579312-94651dfd596d?auto=format&fit=crop&q=80&w=1400',  desc: 'A vertical steel column drilled with a single continuous bore from top to base — a channel through the centre of a solid form. The depth of the hole exceeds what the eye can resolve from any single viewing angle, creating a persistent sense of the unknowable interior.' },
+      18: { title: 'GROUND XII',      year: '2018', label: '[ SCULPTURES — 06 ]',medium: 'Mixed Media',           dimensions: '300 × 200 × 5 cm',   location: 'Artist\'s Estate',                 img: 'https://images.unsplash.com/photo-1554907984-15263bfd63bd?auto=format&fit=crop&q=80&w=1400',  desc: 'Ground XII is a floor-based work spanning three metres — a field of compacted earth, iron filings, and resin cast into a single low relief. The work references both the agricultural field and the archaeological dig site: ground as archive, as origin.' },
+    };
+
+    /* ── Expandable gallery — lightbox (keyboard/nav only, clicks go to detail panel) ── */
+    const recentIds   = [1, 2, 3, 4, 5, 6];
+    const lightbox    = document.getElementById('lightbox');
+    const lbImg       = document.getElementById('lbImg');
+    const lbCounter   = document.getElementById('lbCounter');
+    const lbClose     = document.getElementById('lbClose');
+    const lbPrev      = document.getElementById('lbPrev');
+    const lbNext      = document.getElementById('lbNext');
+    let lbIndex       = 0;
+
+    function lbOpen(idx) {
+      lbIndex = ((idx % recentIds.length) + recentIds.length) % recentIds.length;
+      const w = works[recentIds[lbIndex]];
+      lbImg.src = w.img;
+      lbImg.alt = w.title;
+      lbCounter.textContent = `${lbIndex + 1} / ${recentIds.length}`;
+      lightbox.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function lbClose_fn() {
+      lightbox.classList.remove('open');
+      document.body.style.overflow = '';
+      setTimeout(() => { lbImg.src = ''; }, 300);
+    }
+
+    lbClose.addEventListener('click', lbClose_fn);
+    lbPrev.addEventListener('click',  (e) => { e.stopPropagation(); lbOpen(lbIndex - 1); });
+    lbNext.addEventListener('click',  (e) => { e.stopPropagation(); lbOpen(lbIndex + 1); });
+
+    lightbox.addEventListener('click', (e) => { if (e.target === lightbox) lbClose_fn(); });
+
+    document.addEventListener('keydown', e => {
+      if (!lightbox.classList.contains('open')) return;
+      if (e.key === 'Escape')      lbClose_fn();
+      if (e.key === 'ArrowRight')  lbOpen(lbIndex + 1);
+      if (e.key === 'ArrowLeft')   lbOpen(lbIndex - 1);
+    });
+
+    /* ── Detail panel (PAINTINGS & SCULPTURES) ── */
+    const panel      = document.getElementById('detailPanel');
+    const detailImg  = document.getElementById('detailImg');
+    const detailLabel = document.getElementById('detailLabel');
+    const detailTitle = document.getElementById('detailTitle');
+    const detailYear  = document.getElementById('detailYear');
+    const detailMeta  = document.getElementById('detailMeta');
+    const detailDesc  = document.getElementById('detailDesc');
+    const closeBtn    = document.getElementById('detailClose');
+
+    function openWork(id) {
+      const w = works[id];
+      if (!w) return;
+      detailImg.src           = w.img;
+      detailImg.alt           = w.title;
+      detailLabel.textContent = w.label;
+      detailTitle.textContent = w.title;
+      detailYear.textContent  = w.year;
+      detailMeta.innerHTML = `
+        <div class="detail-meta-row"><span class="detail-meta-key">MEDIUM</span><span class="detail-meta-val">${w.medium}</span></div>
+        <div class="detail-meta-row"><span class="detail-meta-key">DIMENSIONS</span><span class="detail-meta-val">${w.dimensions}</span></div>
+        <div class="detail-meta-row"><span class="detail-meta-key">LOCATION</span><span class="detail-meta-val">${w.location}</span></div>
+      `;
+      detailDesc.textContent = w.desc;
+      panel.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeWork() {
+      panel.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    /* RECENT tiles → detail panel */
+    document.querySelectorAll('.exp-item').forEach(el => {
+      el.addEventListener('click', () => openWork(+el.dataset.id));
+    });
+
+    /* PAINTINGS & SCULPTURES tiles → detail panel */
+    document.querySelectorAll('.work-card').forEach(card => {
+      card.addEventListener('click', () => openWork(+card.dataset.id));
+    });
+
+    closeBtn.addEventListener('click', closeWork);
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeWork(); });
+  </script>
+</body>
+</html>

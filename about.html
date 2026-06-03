@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About the Artist — Jagadish Bananki</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Space+Mono&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --bg: #0a0a0a; --silver: #e0e0e0; --accent: #ff3c00; --grain-opacity: 0.15; }
+    html { scroll-behavior: smooth; }
+    body { background-color: var(--bg); color: var(--silver); font-family: 'Syncopate', sans-serif; overflow-x: hidden; }
+
+    .halide-grain { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 200; opacity: var(--grain-opacity); filter: url(#grain); }
+
+    .nav { position: fixed; top: 0; left: 0; right: 0; padding: 2.5rem 4rem; display: flex; justify-content: space-between; align-items: flex-start; z-index: 100; pointer-events: none; }
+    .brand { font-weight: 700; font-size: 0.75rem; letter-spacing: 0.2em; }
+    .brand a { color: var(--silver); text-decoration: none; pointer-events: auto; }
+    .brand a:hover { opacity: 0.6; }
+    .nav-links { text-align: right; font-family: 'Space Mono', monospace; font-size: 0.7rem; line-height: 2; pointer-events: auto; }
+    .nav-links a { display: block; color: var(--accent); text-decoration: none; letter-spacing: 0.15em; transition: opacity 0.2s; }
+    .nav-links a:hover { opacity: 0.6; }
+    .nav-links a.active { border-bottom: 1px solid var(--accent); }
+
+    .page-hero {
+      position: relative;
+      width: 100vw;
+      height: 40vh;
+      min-height: 260px;
+      display: flex;
+      align-items: flex-end;
+      overflow: hidden;
+      background-color: var(--bg);
+    }
+
+    .page-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        repeating-radial-gradient(circle at 30% 60%, transparent 0, transparent 60px, rgba(255,255,255,0.04) 61px, transparent 62px),
+        repeating-linear-gradient(0deg, transparent, transparent 79px, rgba(255,255,255,0.02) 80px),
+        repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(255,255,255,0.02) 80px);
+    }
+
+    .page-hero-inner {
+      position: relative;
+      z-index: 2;
+      padding: 4rem;
+      width: 100%;
+    }
+
+    .page-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+
+    .page-title {
+      font-size: clamp(3rem, 8vw, 7rem);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 0.85;
+    }
+
+    .section-divider { width: 100%; height: 1px; background: rgba(224,224,224,0.08); }
+
+    .section {
+      position: relative;
+      width: 100vw;
+      background-color: var(--bg);
+      overflow: hidden;
+    }
+
+    .section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        repeating-radial-gradient(circle at 50% 50%, transparent 0, transparent 60px, rgba(255,255,255,0.03) 61px, transparent 62px),
+        repeating-linear-gradient(0deg, transparent, transparent 79px, rgba(255,255,255,0.02) 80px),
+        repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(255,255,255,0.02) 80px);
+      pointer-events: none;
+    }
+
+    .section-inner { position: relative; z-index: 2; max-width: 900px; width: 100%; padding: 6rem 4rem; margin: 0 auto; }
+
+    .section-subtitle {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      color: var(--accent);
+      margin-bottom: 2rem;
+    }
+
+    .section-heading {
+      font-size: clamp(1.5rem, 3vw, 2.5rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 0.9;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid rgba(224,224,224,0.1);
+      padding-bottom: 2rem;
+    }
+
+    .section-body { font-family: 'Space Mono', monospace; font-size: 0.8rem; line-height: 2; color: rgba(224,224,224,0.6); max-width: 640px; }
+    .section-body p + p { margin-top: 1.5rem; }
+
+    /* ── Link preview ── */
+    .preview-link {
+      color: var(--silver);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(224,224,224,0.3);
+      cursor: pointer;
+      position: relative;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .preview-link:hover { color: var(--accent); border-color: var(--accent); }
+
+    .preview-card {
+      position: fixed;
+      z-index: 500;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(12px) scale(0.88);
+      transition: opacity 0.22s cubic-bezier(0.16,1,0.3,1), transform 0.28s cubic-bezier(0.16,1,0.3,1);
+      will-change: transform, opacity;
+    }
+    .preview-card.visible {
+      opacity: 1;
+      transform: translateY(0px) scale(1);
+    }
+    .preview-card-inner {
+      background: #111;
+      border: 1px solid rgba(224,224,224,0.12);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04);
+      width: 220px;
+    }
+    .preview-card-inner img {
+      display: block;
+      width: 220px;
+      height: 138px;
+      object-fit: cover;
+      filter: grayscale(0.4) contrast(1.1);
+    }
+    .preview-card-label {
+      padding: 0.6rem 0.8rem 0.7rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.55rem;
+      letter-spacing: 0.15em;
+      color: rgba(224,224,224,0.45);
+    }
+
+    .stat-row { display: flex; gap: 4rem; margin-top: 3rem; flex-wrap: wrap; }
+    .stat { }
+    .stat-num { font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 700; color: var(--silver); line-height: 1; }
+    .stat-label { font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 0.2em; color: var(--accent); margin-top: 0.5rem; }
+  </style>
+<body>
+
+  <svg style="position:absolute;width:0;height:0">
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" />
+      <feColorMatrix type="saturate" values="0" />
+    </filter>
+  </svg>
+  <div class="halide-grain"></div>
+
+  <nav class="nav">
+    <div class="brand"><a href="index.html">ARTIST | SCULPTOR</a></div>
+    <div class="nav-links">
+      <a href="about.html" class="active">ABOUT THE ARTIST</a>
+      <a href="works.html">WORKS</a>
+      <a href="exhibitions.html">EXHIBITIONS</a>
+      <a href="events.html">EVENTS, PRESS &amp; MEDIA</a>
+      <a href="index.html#contact">CONTACT</a>
+    </div>
+  </nav>
+
+  <div class="page-hero">
+    <div class="page-hero-inner">
+      <p class="page-label">[ ABOUT THE ARTIST ]</p>
+      <h1 class="page-title">JAGADISH<br />BANANKI</h1>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- Link preview card (shared, moved by JS) -->
+  <div class="preview-card" id="previewCard">
+    <div class="preview-card-inner">
+      <img id="previewImg" src="" alt="" />
+      <div class="preview-card-label" id="previewLabel"></div>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="section-inner">
+      <p class="section-subtitle">[ PRACTICE ]</p>
+      <h2 class="section-heading">THE WORK</h2>
+      <div class="section-body">
+        <p>Jagadish Bananki is a multidisciplinary
+          <span class="preview-link"
+            data-img="https://images.unsplash.com/photo-1554907984-15263bfd63bd?auto=format&fit=crop&q=80&w=440"
+            data-label="ARTIST & SCULPTOR">artist and sculptor</span>
+          whose practice explores the tension between
+          <span class="preview-link"
+            data-img="https://images.unsplash.com/photo-1549490349-8643362247b5?auto=format&fit=crop&q=80&w=440"
+            data-label="MATERIAL & VOID">material and void</span>,
+          surface and depth. Working across
+          <span class="preview-link"
+            data-img="https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?auto=format&fit=crop&q=80&w=440"
+            data-label="STONE, METAL & MIXED MEDIA">stone, metal, and mixed media</span>,
+          his work invites the viewer into a dialogue with form.</p>
+        <p>Based between studio and landscape, Bananki draws from
+          <span class="preview-link"
+            data-img="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=440"
+            data-label="GEOLOGICAL TIME">geological time</span>,
+          <span class="preview-link"
+            data-img="https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&q=80&w=440"
+            data-label="TOPOGRAPHICAL MEMORY">topographical memory</span>,
+          and the residue of light on surface — translating these forces into enduring physical objects.</p>
+        <p>His
+          <span class="preview-link"
+            data-img="https://images.unsplash.com/photo-1518998053901-5348d3961a04?auto=format&fit=crop&q=80&w=440"
+            data-label="SCULPTURES">sculptures</span>
+          occupy an uneasy space between the natural and the constructed, challenging the viewer's sense of weight, permanence, and touch.</p>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat">
+          <div class="stat-num">18+</div>
+          <div class="stat-label">YEARS ACTIVE</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">40+</div>
+          <div class="stat-label">WORKS COMPLETED</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">12</div>
+          <div class="stat-label">EXHIBITIONS</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <section class="section">
+    <div class="section-inner">
+      <p class="section-subtitle">[ BIOGRAPHY ]</p>
+      <h2 class="section-heading">BACKGROUND</h2>
+      <div class="section-body">
+        <p>Born and raised in Hyderabad, India, Bananki trained at the National Institute of Fine Arts before establishing his studio practice in 2007.</p>
+        <p>His work has been acquired by private collectors and public institutions across Europe and Asia. He has been a resident artist at studios in Berlin, Mumbai, and London.</p>
+        <p>Bananki currently works from his studio in Hyderabad, where he divides his time between large-format sculpture and intimate drawings in graphite and oxide.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <section class="section">
+    <div class="section-inner">
+      <p class="section-subtitle">[ AWARDS ]</p>
+      <h2 class="section-heading">RECOGNITION</h2>
+      <div class="section-body">
+        <p style="color:var(--accent);margin-bottom:1rem;">— 2026</p>
+        <p>National Sculpture Prize<br />Arts Council of India</p>
+        <br />
+        <p style="color:var(--accent);margin-bottom:1rem;">— 2024</p>
+        <p>International Material Art Award<br />Kunsthalle Basel</p>
+        <br />
+        <p style="color:var(--accent);margin-bottom:1rem;">— 2022</p>
+        <p>Emerging Artist Grant<br />Whitefield Foundation, London</p>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const card     = document.getElementById('previewCard');
+    const img      = document.getElementById('previewImg');
+    const label    = document.getElementById('previewLabel');
+    const CARD_W   = 220;
+    const CARD_H   = 180; // approx card height
+    let   rafId    = null;
+    let   targetX  = 0, targetY = 0;
+    let   currentX = 0, currentY = 0;
+
+    function lerp(a, b, t) { return a + (b - a) * t; }
+
+    function animate() {
+      currentX = lerp(currentX, targetX, 0.18);
+      currentY = lerp(currentY, targetY, 0.18);
+      card.style.left = currentX + 'px';
+      card.style.top  = currentY + 'px';
+      rafId = requestAnimationFrame(animate);
+    }
+
+    document.querySelectorAll('.preview-link').forEach(el => {
+      el.addEventListener('mouseenter', (e) => {
+        img.src         = el.dataset.img;
+        label.textContent = el.dataset.label;
+        card.classList.add('visible');
+        if (!rafId) rafId = requestAnimationFrame(animate);
+        positionCard(e);
+      });
+
+      el.addEventListener('mousemove', positionCard);
+
+      el.addEventListener('mouseleave', () => {
+        card.classList.remove('visible');
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      });
+    });
+
+    function positionCard(e) {
+      const offset = 16;
+      let x = e.clientX + offset;
+      let y = e.clientY - CARD_H / 2;
+      // keep within viewport
+      if (x + CARD_W > window.innerWidth - 8) x = e.clientX - CARD_W - offset;
+      if (y < 8) y = 8;
+      if (y + CARD_H > window.innerHeight - 8) y = window.innerHeight - CARD_H - 8;
+      targetX = x;
+      targetY = y;
+    }
+  </script>
+</body>
+</html>

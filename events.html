@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Events, Press &amp; Media — Jagadish Bananki</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Space+Mono&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --bg: #0a0a0a; --silver: #e0e0e0; --accent: #ff3c00; --grain-opacity: 0.15; }
+    html { scroll-behavior: smooth; }
+    body { background-color: var(--bg); color: var(--silver); font-family: 'Syncopate', sans-serif; overflow-x: hidden; }
+
+    .halide-grain { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 200; opacity: var(--grain-opacity); filter: url(#grain); }
+
+    .nav { position: fixed; top: 0; left: 0; right: 0; padding: 2.5rem 4rem; display: flex; justify-content: space-between; align-items: flex-start; z-index: 300; pointer-events: none; }
+    .brand { font-weight: 700; font-size: 0.75rem; letter-spacing: 0.2em; }
+    .brand a { color: var(--silver); text-decoration: none; pointer-events: auto; }
+    .brand a:hover { opacity: 0.6; }
+    .nav-links { text-align: right; font-family: 'Space Mono', monospace; font-size: 0.7rem; line-height: 2; pointer-events: auto; }
+    .nav-links a { display: block; color: var(--accent); text-decoration: none; letter-spacing: 0.15em; transition: opacity 0.2s; }
+    .nav-links a:hover { opacity: 0.6; }
+    .nav-links a.active { border-bottom: 1px solid var(--accent); }
+
+    /* ── Portrait wall section ── */
+    .portrait-wall {
+      position: relative;
+      width: 100vw;
+      background: var(--bg);
+    }
+
+    /* Scroll hint */
+    .wall-hint {
+      position: absolute;
+      left: 50%;
+      top: 60vh;
+      transform: translateX(-50%);
+      text-align: center;
+      z-index: 5;
+      pointer-events: none;
+      transition: opacity 0.4s;
+    }
+    .wall-hint span {
+      display: block;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.25em;
+      color: rgba(224,224,224,0.35);
+      text-transform: uppercase;
+    }
+    .wall-hint-line {
+      width: 1px;
+      height: 60px;
+      background: linear-gradient(to bottom, rgba(224,224,224,0.3), transparent);
+      margin: 0.75rem auto 0;
+    }
+    .wall-hint.hidden { opacity: 0; }
+
+    /* Sticky title with mix-blend-mode exclusion */
+    .wall-sticky-title {
+      position: sticky;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 20;
+      text-align: center;
+      pointer-events: none;
+      mix-blend-mode: exclusion;
+      color: #fff;
+      margin: 0;
+      /* pull it up so it doesn't push layout */
+      height: 0;
+      overflow: visible;
+    }
+    .wall-sticky-title h1 {
+      font-size: clamp(3rem, 10vw, 9rem);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 0.85;
+      white-space: nowrap;
+    }
+    .wall-sticky-title p {
+      margin-top: 0.5rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      color: rgba(255,255,255,0.5);
+    }
+
+    /* Portrait grid */
+    .wall-grid {
+      position: relative;
+      z-index: 0;
+      margin-top: 50vh;
+      margin-bottom: 50vh;
+    }
+
+    .wall-row {
+      display: flex;
+      width: 100%;
+    }
+
+    .wall-cell {
+      flex: 1;
+      aspect-ratio: 1;
+    }
+
+    /* The animating item inside each cell */
+    .wall-item {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform: scale(0);
+      will-change: transform;
+    }
+
+    .wall-item img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(0.7) contrast(1.15);
+      transition: filter 0.4s;
+    }
+    .wall-item:hover img { filter: grayscale(0.2) contrast(1.1); }
+
+    .wall-caption {
+      position: absolute;
+      bottom: -1.4rem;
+      left: 0; right: 0;
+      display: flex;
+      justify-content: space-between;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.5rem;
+      letter-spacing: 0.12em;
+      color: rgba(224,224,224,0.3);
+      text-transform: uppercase;
+      padding: 0 2px;
+    }
+
+    /* ── Content sections below ── */
+    .section-divider { width: 100%; height: 1px; background: rgba(224,224,224,0.08); }
+
+    .section { position: relative; width: 100vw; background-color: var(--bg); overflow: hidden; }
+    .section::before {
+      content: ''; position: absolute; inset: 0;
+      background-image:
+        repeating-radial-gradient(circle at 50% 50%, transparent 0, transparent 60px, rgba(255,255,255,0.03) 61px, transparent 62px),
+        repeating-linear-gradient(0deg, transparent, transparent 79px, rgba(255,255,255,0.02) 80px),
+        repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(255,255,255,0.02) 80px);
+      pointer-events: none;
+    }
+    .section-inner { position: relative; z-index: 2; max-width: 900px; width: 100%; padding: 6rem 4rem; margin: 0 auto; }
+    .section-subtitle { font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 0.3em; color: var(--accent); margin-bottom: 2rem; }
+    .section-heading {
+      font-size: clamp(1.5rem, 3vw, 2.5rem); font-weight: 700; letter-spacing: -0.03em; line-height: 0.9;
+      margin-bottom: 3rem; border-bottom: 1px solid rgba(224,224,224,0.1); padding-bottom: 2rem;
+    }
+
+    .event-list { display: flex; flex-direction: column; }
+    .event-item {
+      display: grid; grid-template-columns: 100px 1fr auto; gap: 2rem;
+      align-items: baseline; padding: 1.5rem 0;
+      border-bottom: 1px solid rgba(224,224,224,0.06);
+      font-family: 'Space Mono', monospace;
+    }
+    .ev-date   { font-size: 0.65rem; color: var(--accent); letter-spacing: 0.1em; line-height: 1.6; }
+    .ev-title  { font-size: 0.75rem; letter-spacing: 0.05em; color: var(--silver); margin-bottom: 0.3rem; }
+    .ev-detail { font-size: 0.65rem; color: rgba(224,224,224,0.4); }
+    .ev-tag    { font-size: 0.55rem; letter-spacing: 0.2em; padding: 0.25rem 0.6rem; border: 1px solid rgba(255,60,0,0.3); color: var(--accent); white-space: nowrap; align-self: center; }
+
+    .press-list { display: flex; flex-direction: column; }
+    .press-item { padding: 1.5rem 0; border-bottom: 1px solid rgba(224,224,224,0.06); font-family: 'Space Mono', monospace; }
+    .press-pub   { font-size: 0.6rem; color: var(--accent); letter-spacing: 0.2em; margin-bottom: 0.5rem; }
+    .press-title { font-size: 0.75rem; letter-spacing: 0.04em; color: var(--silver); margin-bottom: 0.3rem; }
+    .press-meta  { font-size: 0.6rem; color: rgba(224,224,224,0.35); }
+
+    .media-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1px; background: rgba(224,224,224,0.08); margin-top: 1rem;
+    }
+    .media-item {
+      aspect-ratio: 16/9; background: var(--bg);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;
+      font-family: 'Space Mono', monospace; font-size: 0.55rem; letter-spacing: 0.15em;
+      color: rgba(224,224,224,0.2); border: 1px solid rgba(224,224,224,0.04);
+      cursor: pointer; transition: background 0.3s, color 0.3s; text-align: center; padding: 1rem;
+    }
+    .media-item:hover { background: rgba(255,60,0,0.05); color: var(--accent); }
+    .media-icon { font-size: 1.2rem; opacity: 0.3; }
+  </style>
+<body>
+
+  <svg style="position:absolute;width:0;height:0">
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" />
+      <feColorMatrix type="saturate" values="0" />
+    </filter>
+  </svg>
+  <div class="halide-grain"></div>
+
+  <nav class="nav">
+    <div class="brand"><a href="index.html">ARTIST | SCULPTOR</a></div>
+    <div class="nav-links">
+      <a href="about.html">ABOUT THE ARTIST</a>
+      <a href="works.html">WORKS</a>
+      <a href="exhibitions.html">EXHIBITIONS</a>
+      <a href="events.html" class="active">EVENTS, PRESS &amp; MEDIA</a>
+      <a href="index.html#contact">CONTACT</a>
+    </div>
+  </nav>
+
+  <!-- ── Portrait Wall ── -->
+  <section class="portrait-wall" id="portraitWall">
+
+    <!-- Scroll hint -->
+    <div class="wall-hint" id="wallHint">
+      <span>Scroll to explore</span>
+      <div class="wall-hint-line"></div>
+    </div>
+
+    <!-- Sticky blended title -->
+    <div class="wall-sticky-title">
+      <h1>EVENTS,<br />PRESS &amp;<br />MEDIA</h1>
+      <p>[ JAGADISH BANANKI — 2026 ]</p>
+    </div>
+
+    <!-- Portrait grid (built by JS) -->
+    <div class="wall-grid" id="wallGrid"></div>
+
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- Events -->
+  <section class="section" id="events">
+    <div class="section-inner">
+      <p class="section-subtitle">[ UPCOMING EVENTS ]</p>
+      <h2 class="section-heading">EVENTS</h2>
+      <div class="event-list">
+        <div class="event-item">
+          <div class="ev-date">12 SEPT<br />2026</div>
+          <div><div class="ev-title">ARTIST TALK — FORM &amp; VOID</div><div class="ev-detail">Gallery Meridian, Berlin — 6:00 PM CET</div></div>
+          <div class="ev-tag">TALK</div>
+        </div>
+        <div class="event-item">
+          <div class="ev-date">04 NOV<br />2026</div>
+          <div><div class="ev-title">OPENING — MINERAL TIME</div><div class="ev-detail">Hauser &amp; Collective, Zürich — 7:00 PM</div></div>
+          <div class="ev-tag">OPENING</div>
+        </div>
+        <div class="event-item">
+          <div class="ev-date">20 JAN<br />2027</div>
+          <div><div class="ev-title">SCULPTURE MASTERCLASS</div><div class="ev-detail">National Institute of Fine Arts, Hyderabad</div></div>
+          <div class="ev-tag">WORKSHOP</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- Press -->
+  <section class="section" id="press">
+    <div class="section-inner">
+      <p class="section-subtitle">[ PRESS ]</p>
+      <h2 class="section-heading">PRESS &amp;<br />PUBLICATIONS</h2>
+      <div class="press-list">
+        <div class="press-item">
+          <div class="press-pub">ART FORUM — 2026</div>
+          <div class="press-title">"Bananki and the Weight of Stone"</div>
+          <div class="press-meta">Feature essay, Issue 44, Spring 2026</div>
+        </div>
+        <div class="press-item">
+          <div class="press-pub">THE HINDU — JAN 2026</div>
+          <div class="press-title">"Topographical Light: A Solo Show of Quiet Force"</div>
+          <div class="press-meta">Review by Priya Menon</div>
+        </div>
+        <div class="press-item">
+          <div class="press-pub">FRIEZE — 2025</div>
+          <div class="press-title">"Surface Tension at Whitefield Gallery"</div>
+          <div class="press-meta">Exhibition review, London</div>
+        </div>
+        <div class="press-item">
+          <div class="press-pub">KUNSTHALLE BASEL CATALOGUE — 2024</div>
+          <div class="press-title">"Material Memory — Essay &amp; Artist Statement"</div>
+          <div class="press-meta">Publication, 48 pp.</div>
+        </div>
+        <div class="press-item">
+          <div class="press-pub">DOMUS — 2023</div>
+          <div class="press-title">"The Sculptor Who Listens to Stone"</div>
+          <div class="press-meta">Profile interview</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- Media -->
+  <section class="section" id="media">
+    <div class="section-inner">
+      <p class="section-subtitle">[ MEDIA ]</p>
+      <h2 class="section-heading">VIDEO &amp;<br />DOCUMENTATION</h2>
+      <div class="media-grid">
+        <div class="media-item"><div class="media-icon">▶</div><span>STUDIO VISIT 2026</span></div>
+        <div class="media-item"><div class="media-icon">▶</div><span>ARTIST TALK — BERLIN</span></div>
+        <div class="media-item"><div class="media-icon">▶</div><span>PROCESS FILM — FORM I</span></div>
+        <div class="media-item"><div class="media-icon">▶</div><span>KUNSTHALLE WALKTHROUGH</span></div>
+        <div class="media-item"><div class="media-icon">▶</div><span>INTERVIEW — DOMUS 2023</span></div>
+        <div class="media-item"><div class="media-icon">▶</div><span>BIENNALE DOCUMENTATION</span></div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    /* ── Portrait data (Unsplash art/people images) ── */
+    const portraits = [
+      { name: 'STUDIO VISIT',       role: 'BERLIN 2026',    src: 'https://images.unsplash.com/photo-1554907984-15263bfd63bd?auto=format&fit=crop&q=80&w=600' },
+      { name: 'PRESS TALK',         role: 'ART FORUM',      src: 'https://images.unsplash.com/photo-1549490349-8643362247b5?auto=format&fit=crop&q=80&w=600' },
+      { name: 'FORM & VOID',        role: 'SEPT 2026',      src: 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?auto=format&fit=crop&q=80&w=600' },
+      { name: 'MINERAL TIME',       role: 'ZÜRICH',         src: 'https://images.unsplash.com/photo-1518998053901-5348d3961a04?auto=format&fit=crop&q=80&w=600' },
+      { name: 'TOPOGRAPHICAL LIGHT','role': 'MUMBAI 2026',  src: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&q=80&w=600' },
+      { name: 'SURFACE TENSION',    role: 'LONDON 2025',    src: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=600' },
+      { name: 'MATERIAL MEMORY',    role: 'BASEL 2024',     src: 'https://images.unsplash.com/photo-1580136579312-94651dfd596d?auto=format&fit=crop&q=80&w=600' },
+      { name: 'DEPTH & GROUND',     role: 'KOCHI 2023',     src: 'https://images.unsplash.com/photo-1574182245530-967d9b3831af?auto=format&fit=crop&q=80&w=600' },
+      { name: 'VOID STUDIES',       role: 'NEW DELHI 2022', src: 'https://images.unsplash.com/photo-1545987796-200677ee1011?auto=format&fit=crop&q=80&w=600' },
+      { name: 'STRATA',             role: 'GURUGRAM 2020',  src: 'https://images.unsplash.com/photo-1524413840807-0c3cb6fa808d?auto=format&fit=crop&q=80&w=600' },
+      { name: 'GRAPHITE STUDIES',   role: 'STUDIO 2025',    src: 'https://images.unsplash.com/photo-1551913902-c92207136625?auto=format&fit=crop&q=80&w=600' },
+      { name: 'ARCHIVE',            role: 'HYDERABAD',      src: 'https://images.unsplash.com/photo-1567095761054-7a02e69e5c43?auto=format&fit=crop&q=80&w=600' },
+    ];
+
+    const COLS = window.innerWidth >= 1024 ? 4 : window.innerWidth >= 640 ? 3 : 2;
+
+    /* Build scattered layout — one per row, every 3rd row gets a second */
+    function buildLayout(count, cols) {
+      const rows = [];
+      let i = 0, r = 0;
+      while (i < count) {
+        const row = new Array(cols).fill(-1);
+        const a = (r * 2 + (r % 2)) % cols;
+        row[a] = i++;
+        if (r % 3 === 0 && i < count) {
+          let b = (a + 2) % cols;
+          if (b === a) b = (a + 1) % cols;
+          row[b] = i++;
+        }
+        rows.push(row);
+        r++;
+      }
+      return rows;
+    }
+
+    /* Render grid */
+    const grid    = document.getElementById('wallGrid');
+    const layout  = buildLayout(portraits.length, COLS);
+    const items   = []; // { el, cell }
+
+    layout.forEach((row, ri) => {
+      const rowEl = document.createElement('div');
+      rowEl.className = 'wall-row';
+
+      row.forEach((idx, ci) => {
+        const cell = document.createElement('div');
+        cell.className = 'wall-cell';
+
+        if (idx !== -1) {
+          const p = portraits[idx];
+          const origin = ci < COLS / 2 ? 'right bottom' : 'left bottom';
+
+          const item = document.createElement('div');
+          item.className = 'wall-item';
+          item.style.transformOrigin = origin;
+
+          const img = document.createElement('img');
+          img.src     = p.src;
+          img.alt     = p.name;
+          img.loading = 'lazy';
+          img.decoding = 'async';
+
+          const cap = document.createElement('div');
+          cap.className = 'wall-caption';
+          cap.innerHTML = `<span>${p.name}</span><span>${p.role}</span>`;
+
+          item.appendChild(img);
+          item.appendChild(cap);
+          cell.appendChild(item);
+          items.push({ el: item, cell });
+        }
+
+        rowEl.appendChild(cell);
+      });
+
+      grid.appendChild(rowEl);
+    });
+
+    /* ── Scroll-driven scale animation (mirrors GSAP scrub) ── */
+    const hint = document.getElementById('wallHint');
+    let   hintHidden = false;
+
+    function lerp(a, b, t) { return a + (b - a) * t; }
+    function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+    function tick() {
+      const scrollY = window.scrollY;
+      const vh      = window.innerHeight;
+
+      /* Fade hint once user scrolls 40% of first viewport */
+      if (!hintHidden && scrollY > vh * 0.3) {
+        hint.classList.add('hidden');
+        hintHidden = true;
+      }
+
+      /* Scale each portrait based on its position relative to viewport */
+      items.forEach(({ el }) => {
+        const rect    = el.getBoundingClientRect();
+        const centre  = rect.top + rect.height / 2;   // centre of item in viewport
+        const progress = centre / vh;                  // 1 = just entered, 0 = at top, -1 = exited
+
+        /* 0 → 1 as item enters bottom half; 1 → 0 as it leaves top half */
+        let scale;
+        if (progress > 1) {
+          scale = 0;
+        } else if (progress > 0.5) {
+          /* entering: bottom of screen → centre */
+          scale = clamp((1 - progress) * 2, 0, 1);
+        } else if (progress > 0) {
+          /* leaving: centre → top of screen */
+          scale = clamp(progress * 2, 0, 1);
+        } else {
+          scale = 0;
+        }
+
+        /* Ease with power2 */
+        const eased = scale < 0.5
+          ? 2 * scale * scale
+          : 1 - Math.pow(-2 * scale + 2, 2) / 2;
+
+        el.style.transform = `scale(${eased})`;
+      });
+
+      requestAnimationFrame(tick);
+    }
+
+    tick();
+  </script>
+</body>
+</html>

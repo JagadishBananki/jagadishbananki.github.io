@@ -1,533 +1,379 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>teamLab — Borderless Digital Art</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Raleway:wght@200;300;400&display=swap" rel="stylesheet">
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jagadish Bananki</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Space+Mono&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  :root {
-    --ink: #0a0a0f;
-    --paper: #f8f5ef;
-    --gold: #c8a96e;
-    --rose: #e8a0a0;
-    --teal: #6cc6c0;
-    --violet: #9b8ec4;
-    --sky: #7fb3d4;
-    --mist: rgba(248,245,239,0.07);
-  }
+    :root {
+      --bg: #0a0a0a;
+      --silver: #e0e0e0;
+      --accent: #ff3c00;
+      --grain-opacity: 0.15;
+    }
 
-  html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; }
 
-  body {
-    font-family: 'Raleway', sans-serif;
-    font-weight: 300;
-    background: var(--ink);
-    color: var(--paper);
-    overflow-x: hidden;
-    cursor: none;
-  }
+    body {
+      background-color: var(--bg);
+      color: var(--silver);
+      font-family: 'Syncopate', sans-serif;
+      overflow-x: hidden;
+    }
 
-  /* ── CURSOR ── */
-  .cursor-dot {
-    position: fixed; width: 6px; height: 6px;
-    background: var(--gold); border-radius: 50%;
-    pointer-events: none; z-index: 9999;
-    transform: translate(-50%,-50%);
-    transition: opacity .3s;
-  }
-  .cursor-ring {
-    position: fixed; width: 36px; height: 36px;
-    border: 1px solid rgba(200,169,110,0.5); border-radius: 50%;
-    pointer-events: none; z-index: 9999;
-    transform: translate(-50%,-50%);
-    transition: width .25s, height .25s, border-color .25s;
-  }
-  body:hover .cursor-ring { border-color: rgba(200,169,110,0.8); }
+    .halide-grain {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 200;
+      opacity: var(--grain-opacity);
+      filter: url(#grain);
+    }
 
-  /* ── NAV ── */
-  nav {
-    position: fixed; top: 0; left: 0; width: 100%;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 2rem 4rem;
-    z-index: 100;
-    mix-blend-mode: difference;
-  }
-  .nav-logo {
-    font-family: 'Cormorant Garamond', serif;
-    font-weight: 300; font-size: 1.4rem;
-    letter-spacing: 0.35em; text-transform: uppercase;
-    color: var(--paper);
-    text-decoration: none;
-  }
-  .nav-links { display: flex; gap: 3rem; list-style: none; }
-  .nav-links a {
-    font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
-    color: var(--paper); text-decoration: none; opacity: 0.7;
-    transition: opacity .3s;
-  }
-  .nav-links a:hover { opacity: 1; }
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      padding: 2.5rem 4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      z-index: 100;
+      pointer-events: none;
+    }
 
-  /* ── SECTIONS ── */
-  section { position: relative; z-index: 1; }
+    .brand {
+      font-weight: 700;
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+    }
 
-  /* ── HERO ── */
-  #hero {
-    height: 100vh; display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    text-align: center; padding: 2rem;
-  }
-  .hero-eyebrow {
-    font-size: 0.65rem; letter-spacing: 0.4em; text-transform: uppercase;
-    color: var(--gold); margin-bottom: 2.5rem;
-    opacity: 0; animation: fadeUp .8s .3s forwards;
-  }
-  .hero-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-weight: 300; font-size: clamp(3.5rem, 8vw, 7rem);
-    line-height: 1.05; letter-spacing: -0.01em;
-    opacity: 0; animation: fadeUp .9s .5s forwards;
-  }
-  .hero-title em { font-style: italic; color: var(--gold); }
-  .hero-sub {
-    margin-top: 2rem; max-width: 480px;
-    font-size: 0.85rem; line-height: 1.9; letter-spacing: 0.06em;
-    opacity: 0.6; animation: fadeUp .9s .75s forwards; opacity: 0;
-  }
-  .hero-sub.visible { opacity: 0.6; }
-  .hero-cta {
-    margin-top: 3.5rem; display: flex; gap: 1.5rem;
-    opacity: 0; animation: fadeUp .9s 1s forwards;
-  }
-  .btn {
-    font-family: 'Raleway', sans-serif; font-size: 0.65rem;
-    letter-spacing: 0.3em; text-transform: uppercase;
-    padding: 1rem 2.8rem; text-decoration: none;
-    cursor: pointer; border: none;
-    transition: transform .3s, background .3s;
-  }
-  .btn-primary { background: var(--gold); color: var(--ink); }
-  .btn-primary:hover { transform: translateY(-2px); }
-  .btn-ghost {
-    background: transparent; color: var(--paper);
-    border: 1px solid rgba(248,245,239,0.3);
-  }
-  .btn-ghost:hover { border-color: var(--paper); transform: translateY(-2px); }
-  .hero-scroll {
-    position: absolute; bottom: 3rem;
-    display: flex; flex-direction: column; align-items: center; gap: .6rem;
-    font-size: 0.6rem; letter-spacing: 0.3em; opacity: 0.4;
-  }
-  .scroll-line {
-    width: 1px; height: 60px;
-    background: linear-gradient(to bottom, var(--paper), transparent);
-    animation: scrollPulse 2s ease-in-out infinite;
-  }
-  @keyframes scrollPulse {
-    0%,100% { transform: scaleY(1); opacity: .4; }
-    50% { transform: scaleY(1.3); opacity: .9; }
-  }
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(24px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+    .nav-links {
+      text-align: right;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      line-height: 2;
+      pointer-events: auto;
+    }
 
-  /* ── WORKS GRID ── */
-  #works { padding: 12rem 4rem; }
-  .section-label {
-    font-size: 0.6rem; letter-spacing: 0.45em; text-transform: uppercase;
-    color: var(--gold); margin-bottom: 1rem;
-  }
-  .section-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-weight: 300; font-size: clamp(2rem, 4vw, 3.5rem);
-    line-height: 1.2; margin-bottom: 4rem;
-  }
-  .works-grid {
-    display: grid;
-    grid-template-columns: repeat(12, 1fr);
-    gap: 1.5rem;
-  }
-  .work-card {
-    position: relative; overflow: hidden;
-    aspect-ratio: 3/4; cursor: pointer;
-  }
-  .work-card:nth-child(1) { grid-column: span 5; aspect-ratio: auto; min-height: 500px; }
-  .work-card:nth-child(2) { grid-column: span 4; aspect-ratio: auto; min-height: 500px; }
-  .work-card:nth-child(3) { grid-column: span 3; aspect-ratio: auto; min-height: 500px; }
-  .work-card:nth-child(4) { grid-column: span 3; aspect-ratio: auto; min-height: 280px; }
-  .work-card:nth-child(5) { grid-column: span 5; aspect-ratio: auto; min-height: 280px; }
-  .work-card:nth-child(6) { grid-column: span 4; aspect-ratio: auto; min-height: 280px; }
+    .nav-links a {
+      display: block;
+      color: var(--accent);
+      text-decoration: none;
+      letter-spacing: 0.15em;
+      transition: opacity 0.2s;
+    }
 
-  .work-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
-  .work-overlay {
-    position: absolute; inset: 0;
-    background: linear-gradient(to top, rgba(10,10,15,0.85) 0%, transparent 50%);
-    opacity: 0; transition: opacity .5s;
-    display: flex; align-items: flex-end; padding: 2rem;
-  }
-  .work-card:hover .work-overlay { opacity: 1; }
-  .work-info { transform: translateY(8px); transition: transform .5s; }
-  .work-card:hover .work-info { transform: translateY(0); }
-  .work-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.1rem; font-weight: 300;
-    line-height: 1.3; margin-bottom: .5rem;
-  }
-  .work-meta { font-size: 0.6rem; letter-spacing: 0.2em; opacity: .5; }
+    .nav-links a:hover { opacity: 0.6; }
 
-  /* ── PHILOSOPHY ── */
-  #philosophy {
-    padding: 12rem 4rem;
-    display: grid; grid-template-columns: 1fr 1fr; gap: 8rem;
-    align-items: center;
-  }
-  .philosophy-quote {
-    font-family: 'Cormorant Garamond', serif;
-    font-weight: 300; font-size: clamp(1.8rem, 3vw, 2.8rem);
-    line-height: 1.4; font-style: italic;
-  }
-  .philosophy-quote span { color: var(--gold); }
-  .philosophy-body { font-size: .85rem; line-height: 2.1; opacity: .65; }
-  .philosophy-body p + p { margin-top: 1.5rem; }
-  .divider {
-    width: 40px; height: 1px;
-    background: var(--gold); margin: 2rem 0;
-  }
+    /* ── Hero ── */
+    #hero {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
 
-  /* ── VENUES ── */
-  #venues { padding: 12rem 4rem; }
-  .venues-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1px; background: rgba(248,245,239,0.08);
-    border: 1px solid rgba(248,245,239,0.08);
-    margin-top: 4rem;
-  }
-  .venue-item {
-    padding: 3rem 2.5rem; background: var(--ink);
-    transition: background .4s;
-    cursor: pointer;
-  }
-  .venue-item:hover { background: rgba(200,169,110,0.07); }
-  .venue-city {
-    font-size: .6rem; letter-spacing: .3em; color: var(--gold); margin-bottom: 1rem;
-  }
-  .venue-name {
-    font-family: 'Cormorant Garamond', serif;
-    font-weight: 300; font-size: 1.3rem; line-height: 1.3;
-    margin-bottom: 1.2rem;
-  }
-  .venue-status {
-    font-size: .6rem; letter-spacing: .2em; opacity: .4;
-  }
-  .venue-status.open { color: var(--teal); opacity: 1; }
+    .viewport {
+      perspective: 2000px;
+      width: 100%; height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      inset: 0;
+    }
 
-  /* ── CONCEPTS ── */
-  #concepts {
-    padding: 12rem 4rem;
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 4rem;
-  }
-  .concept {
-    border-top: 1px solid rgba(248,245,239,0.12);
-    padding-top: 2rem;
-  }
-  .concept-num {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 3rem; font-weight: 300; opacity: .2;
-    margin-bottom: 1rem;
-  }
-  .concept-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.4rem; font-weight: 300; margin-bottom: 1rem;
-  }
-  .concept-text { font-size: .8rem; line-height: 2; opacity: .6; }
+    .canvas-3d {
+      position: relative;
+      width: 800px; height: 500px;
+      transform-style: preserve-3d;
+      opacity: 0;
+      transform: rotateX(90deg) rotateZ(0deg) scale(0.8);
+    }
 
-  /* ── FOOTER ── */
-  footer {
-    border-top: 1px solid rgba(248,245,239,0.1);
-    padding: 4rem;
-    display: flex; align-items: center; justify-content: space-between;
-    font-size: .65rem; letter-spacing: .15em; opacity: .4;
-  }
-  .footer-logo {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.1rem; letter-spacing: .3em; opacity: .6;
-  }
+    .layer {
+      position: absolute;
+      inset: 0;
+      border: 1px solid rgba(224,224,224,0.1);
+      background-size: cover;
+      background-position: center;
+      transition: transform 0.5s ease;
+    }
 
-  /* ── REVEAL ANIMATIONS ── */
-  .reveal {
-    opacity: 0; transform: translateY(40px);
-    transition: opacity .9s ease, transform .9s ease;
-  }
-  .reveal.visible { opacity: 1; transform: translateY(0); }
+    .layer-1 {
+      background-image: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=1200');
+      filter: grayscale(1) contrast(1.2) brightness(0.5);
+    }
+    .layer-2 {
+      background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=1200');
+      filter: grayscale(1) contrast(1.1) brightness(0.7);
+      opacity: 0.6; mix-blend-mode: screen;
+    }
+    .layer-3 {
+      background-image: url('https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&q=80&w=1200');
+      filter: grayscale(1) contrast(1.3) brightness(0.8);
+      opacity: 0.4; mix-blend-mode: overlay;
+    }
 
-  @media (max-width: 900px) {
-    nav { padding: 1.5rem 2rem; }
-    .nav-links { display: none; }
-    #works { padding: 6rem 1.5rem; }
-    .works-grid { grid-template-columns: 1fr 1fr; }
-    .work-card:nth-child(n) { grid-column: span 1; min-height: 220px; }
-    #philosophy { grid-template-columns: 1fr; padding: 6rem 1.5rem; gap: 3rem; }
-    #venues { padding: 6rem 1.5rem; }
-    #concepts { grid-template-columns: 1fr; padding: 6rem 1.5rem; gap: 3rem; }
-    footer { flex-direction: column; gap: 1rem; text-align: center; }
-  }
-</style>
-</head>
+    .contours {
+      position: absolute;
+      width: 200%; height: 200%;
+      top: -50%; left: -50%;
+      background-image: repeating-radial-gradient(circle at 50% 50%, transparent 0, transparent 40px, rgba(255,255,255,0.05) 41px, transparent 42px);
+      transform: translateZ(120px);
+      pointer-events: none;
+    }
+
+    .hero-ui {
+      position: absolute;
+      inset: 0;
+      padding: 4rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto 1fr auto;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .hero-title {
+      grid-column: 1 / -1;
+      align-self: center;
+      font-size: clamp(3rem, 10vw, 10rem);
+      line-height: 0.85;
+      letter-spacing: -0.04em;
+      font-weight: 700;
+      mix-blend-mode: difference;
+    }
+
+    .bottom-row {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .archive-info {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      line-height: 2;
+    }
+
+    .cta-button {
+      pointer-events: auto;
+      background: var(--silver);
+      color: var(--bg);
+      padding: 1rem 2rem;
+      text-decoration: none;
+      font-weight: 700;
+      font-family: 'Syncopate', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      clip-path: polygon(0 0, 100% 0, 100% 70%, 85% 100%, 0 100%);
+      transition: background 0.3s, transform 0.3s;
+      display: inline-block;
+    }
+
+    .cta-button:hover { background: var(--accent); transform: translateY(-5px); }
+
+    .name-tag {
+      position: absolute;
+      bottom: 2rem; left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      color: var(--accent);
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 2rem; left: 50%;
+      width: 1px; height: 60px;
+      background: linear-gradient(to bottom, var(--silver), transparent);
+      animation: flow 2s infinite ease-in-out;
+      z-index: 10;
+      margin-left: 40px;
+    }
+
+    @keyframes flow {
+      0%, 100% { transform: scaleY(0); transform-origin: top; }
+      50%       { transform: scaleY(1); transform-origin: top; }
+      51%       { transform: scaleY(1); transform-origin: bottom; }
+    }
+
+    /* ── Scrollable sections ── */
+    .section {
+      position: relative;
+      min-height: 100vh;
+      width: 100vw;
+      background-color: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        repeating-radial-gradient(circle at 50% 50%, transparent 0, transparent 60px, rgba(255,255,255,0.03) 61px, transparent 62px),
+        repeating-linear-gradient(0deg, transparent, transparent 79px, rgba(255,255,255,0.02) 80px),
+        repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(255,255,255,0.02) 80px);
+      pointer-events: none;
+    }
+
+    .section-inner {
+      position: relative;
+      z-index: 2;
+      max-width: 900px;
+      width: 100%;
+      padding: 6rem 4rem;
+    }
+
+    .section-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      color: var(--accent);
+      margin-bottom: 2rem;
+    }
+
+    .section-title {
+      font-size: clamp(2rem, 5vw, 4rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 0.9;
+      margin-bottom: 3rem;
+      border-bottom: 1px solid rgba(224,224,224,0.1);
+      padding-bottom: 2rem;
+    }
+
+    .section-body {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 2;
+      color: rgba(224,224,224,0.6);
+      max-width: 600px;
+    }
+
+    .section-divider {
+      width: 100%;
+      height: 1px;
+      background: rgba(224,224,224,0.08);
+    }
+  </style>
 <body>
 
-<div class="cursor-dot" id="dot"></div>
-<div class="cursor-ring" id="ring"></div>
+  <svg style="position:absolute;width:0;height:0">
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" />
+      <feColorMatrix type="saturate" values="0" />
+    </filter>
+  </svg>
 
-<nav>
-  <a href="#" class="nav-logo">teamLab</a>
-  <ul class="nav-links">
-    <li><a href="#works">Works</a></li>
-    <li><a href="#philosophy">Concepts</a></li>
-    <li><a href="#venues">Exhibitions</a></li>
-    <li><a href="#concepts">About</a></li>
-  </ul>
-</nav>
+  <div class="halide-grain"></div>
 
-<!-- HERO -->
-<section id="hero">
-  <p class="hero-eyebrow">Interdisciplinary Art Collective</p>
-  <h1 class="hero-title">Art &amp; Science,<br><em>Technology &amp; Nature</em></h1>
-  <p class="hero-sub reveal">
-    teamLab seeks to explore the relationship between the self and the world,
-    and new perceptions of the world through art.
-  </p>
-  <div class="hero-cta">
-    <a href="#works" class="btn btn-primary">Explore Works</a>
-    <a href="#venues" class="btn btn-ghost">Visit Museums</a>
-  </div>
-  <div class="hero-scroll">
-    <div class="scroll-line"></div>
-    <span>Scroll</span>
-  </div>
-</section>
+  <nav class="nav">
+    <div class="brand">ARTIST | SCULPTOR</div>
+    <div class="nav-links">
+      <a href="about.html">ABOUT THE ARTIST</a>
+      <a href="works.html">WORKS</a>
+      <a href="exhibitions.html">EXHIBITIONS</a>
+      <a href="events.html">EVENTS, PRESS &amp; MEDIA</a>
+      <a href="#contact">CONTACT</a>
+    </div>
+  </nav>
 
-<!-- WORKS -->
-<section id="works">
-  <p class="section-label reveal">Featured Works</p>
-  <h2 class="section-title reveal">Borderless<br>Digital Art</h2>
-  <div class="works-grid">
-    <div class="work-card" data-colors="20,200,180,180,120,255">
-      <canvas class="work-canvas"></canvas>
-      <div class="work-overlay"><div class="work-info">
-        <p class="work-title">Universe of Water Particles on a Sacred Rock</p>
-        <p class="work-meta">Interactive Digital Installation</p>
-      </div></div>
+  <!-- Hero -->
+  <section id="hero">
+    <div class="viewport">
+      <div class="canvas-3d" id="canvas3d">
+        <div class="layer layer-1" id="layer0"></div>
+        <div class="layer layer-2" id="layer1"></div>
+        <div class="layer layer-3" id="layer2"></div>
+        <div class="contours"></div>
+      </div>
     </div>
-    <div class="work-card" data-colors="255,150,80,200,80,255">
-      <canvas class="work-canvas"></canvas>
-      <div class="work-overlay"><div class="work-info">
-        <p class="work-title">Floating Flower Garden: Flowers and I are of the Same Root</p>
-        <p class="work-meta">Immersive Installation</p>
-      </div></div>
-    </div>
-    <div class="work-card" data-colors="100,80,220,180,200,255">
-      <canvas class="work-canvas"></canvas>
-      <div class="work-overlay"><div class="work-info">
-        <p class="work-title">The Infinite Crystal Universe</p>
-        <p class="work-meta">Interactive Light Sculpture</p>
-      </div></div>
-    </div>
-    <div class="work-card" data-colors="200,220,80,80,200,180">
-      <canvas class="work-canvas"></canvas>
-      <div class="work-overlay"><div class="work-info">
-        <p class="work-title">Forest of Resonating Lamps</p>
-        <p class="work-meta">Interactive Installation</p>
-      </div></div>
-    </div>
-    <div class="work-card" data-colors="220,80,150,80,180,255">
-      <canvas class="work-canvas"></canvas>
-      <div class="work-overlay"><div class="work-info">
-        <p class="work-title">Megaliths in the Open Universe</p>
-        <p class="work-meta">Digital Art — Permanent Collection</p>
-      </div></div>
-    </div>
-    <div class="work-card" data-colors="80,180,220,255,160,80">
-      <canvas class="work-canvas"></canvas>
-      <div class="work-overlay"><div class="work-info">
-        <p class="work-title">Light Vortex</p>
-        <p class="work-meta">Interactive Light Installation</p>
-      </div></div>
-    </div>
-  </div>
-</section>
 
-<!-- PHILOSOPHY -->
-<section id="philosophy">
-  <div>
-    <p class="section-label reveal">Philosophy</p>
-    <blockquote class="philosophy-quote reveal">
-      "Humans perceive the world by <span>dividing it</span> into independent parts. Our art dissolves those boundaries."
-    </blockquote>
-  </div>
-  <div class="reveal">
-    <div class="divider"></div>
-    <div class="philosophy-body">
-      <p>teamLab (est. 2001) is an interdisciplinary collective of artists, programmers, engineers, CG animators, mathematicians, and architects. Together they pursue art, science, technology, and the natural world.</p>
-      <p>Their immersive environments respond to visitor presence and movement — each experience unique. Works are non-static: they change, breathe, and evolve in real time, blurring the boundary between the artwork and the observer.</p>
-      <p>The collective believes boundaries between self and world are artificial — art can dissolve them, revealing a continuous, borderless, interconnected whole.</p>
+    <div class="hero-ui">
+      <div></div><div></div>
+      <h1 class="hero-title">JAGADISH<br />BANANKI</h1>
+      <div class="bottom-row">
+        <div class="archive-info">
+          <p>[ ARCHIVE 2026 ]</p>
+          <p>SURFACE TENSION &amp; TOPOGRAPHICAL LIGHT</p>
+        </div>
+        <a href="works.html" class="cta-button">EXPLORE WORKS</a>
+      </div>
     </div>
-    <div class="divider"></div>
-    <p style="font-size:.6rem;letter-spacing:.25em;opacity:.5;">FOUNDED IN TOKYO, 2001</p>
-  </div>
-</section>
 
-<!-- VENUES -->
-<section id="venues">
-  <p class="section-label reveal">Permanent Museums</p>
-  <h2 class="section-title reveal">Visit teamLab<br>Worldwide</h2>
-  <div class="venues-grid reveal">
-    <div class="venue-item">
-      <p class="venue-city">Tokyo, Japan</p>
-      <p class="venue-name">teamLab Borderless<br>MORI Building Digital Art Museum</p>
-      <p class="venue-status open">● Open — Azabudai Hills</p>
-    </div>
-    <div class="venue-item">
-      <p class="venue-city">Tokyo, Japan</p>
-      <p class="venue-name">teamLab Planets TOKYO</p>
-      <p class="venue-status open">● Open until 2027 — Toyosu</p>
-    </div>
-    <div class="venue-item">
-      <p class="venue-city">Kyoto, Japan</p>
-      <p class="venue-name">teamLab Biovortex Kyoto</p>
-      <p class="venue-status open">● Permanent — Opened 2025</p>
-    </div>
-    <div class="venue-item">
-      <p class="venue-city">Abu Dhabi, UAE</p>
-      <p class="venue-name">teamLab Phenomena Abu Dhabi</p>
-      <p class="venue-status open">● Permanent — Saadiyat Island</p>
-    </div>
-    <div class="venue-item">
-      <p class="venue-city">Jeddah, Saudi Arabia</p>
-      <p class="venue-name">teamLab Borderless Jeddah</p>
-      <p class="venue-status open">● Permanent — Culture Square</p>
-    </div>
-    <div class="venue-item">
-      <p class="venue-city">Osaka, Japan</p>
-      <p class="venue-name">teamLab Botanical Garden Osaka</p>
-      <p class="venue-status open">● Permanent — Nagai Garden</p>
-    </div>
-  </div>
-</section>
+    <div class="name-tag">JAGADISH BANANKI</div>
+    <div class="scroll-hint"></div>
+  </section>
 
-<!-- CONCEPTS -->
-<section id="concepts">
-  <div class="concept reveal">
-    <div class="concept-num">01</div>
-    <p class="concept-title">Borderlessness</p>
-    <p class="concept-text">Works flow into one another without walls or frames. Art exists in continuity — each piece breathing into the next, creating an uninterrupted immersive space.</p>
-  </div>
-  <div class="concept reveal">
-    <div class="concept-num">02</div>
-    <p class="concept-title">Ultra-Subjective Space</p>
-    <p class="concept-text">Rooted in non-Western spatial perspectives, the work challenges how the body perceives space, time, and existence — rejecting fixed vantage points.</p>
-  </div>
-  <div class="concept reveal">
-    <div class="concept-num">03</div>
-    <p class="concept-title">Body Immersion</p>
-    <p class="concept-text">The body itself becomes part of the art. Works respond to touch, movement, and presence — every visitor transforms the experience for all others.</p>
-  </div>
-</section>
+  <div class="section-divider"></div>
 
-<!-- FOOTER -->
-<footer>
-  <span class="footer-logo">teamLab</span>
-  <span>© 2001–2026 teamLab Inc. All rights reserved.</span>
-  <span>Tokyo · Abu Dhabi · Jeddah · Osaka · Kyoto · Macao</span>
-</footer>
+  <!-- Contact -->
+  <section class="section" id="contact">
+    <div class="section-inner">
+      <p class="section-label">[ 01 — CONTACT ]</p>
+      <h2 class="section-title">GET IN<br />TOUCH</h2>
+      <div class="section-body">
+        <p>For commissions, exhibitions, and press enquiries:</p>
+        <br />
+        <p style="color:var(--accent);">studio@jagadishbananki.com</p>
+        <br />
+        <p>STUDIO ADDRESS<br />Plot 12, Art District<br />Hyderabad, India — 500032</p>
+      </div>
+    </div>
+  </section>
 
-<script>
-// ── CURSOR ──
-const dot = document.getElementById('dot');
-const ring = document.getElementById('ring');
-let mx = 0, my = 0, rx = 0, ry = 0;
-document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
-(function animCursor(){
-  rx += (mx - rx) * 0.12;
-  ry += (my - ry) * 0.12;
-  dot.style.left = mx + 'px'; dot.style.top = my + 'px';
-  ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
-  requestAnimationFrame(animCursor);
-})();
+  <script>
+    const canvas = document.getElementById('canvas3d');
+    const layers = [
+      document.getElementById('layer0'),
+      document.getElementById('layer1'),
+      document.getElementById('layer2'),
+    ];
 
-// ── WORK CARD MINI CANVASES ──
-document.querySelectorAll('.work-canvas').forEach((canvas, idx) => {
-  const card = canvas.closest('.work-card');
-  const colors = (card.dataset.colors || '100,200,200,200,100,255').split(',').map(Number);
-  const ctx = canvas.getContext('2d');
-  let pts = [];
-  function resizeCard(){
-    canvas.width = card.offsetWidth;
-    canvas.height = card.offsetHeight;
-  }
-  resizeCard();
-  window.addEventListener('resize', resizeCard);
+    canvas.style.opacity = '0';
+    canvas.style.transform = 'rotateX(90deg) rotateZ(0deg) scale(0.8)';
 
-  // Seed with particles
-  for(let i=0;i<120;i++){
-    pts.push({
-      x: Math.random() * card.offsetWidth,
-      y: Math.random() * card.offsetHeight,
-      vx: (Math.random()-.5)*0.8,
-      vy: (Math.random()-.5)*0.8,
-      size: .8 + Math.random()*2,
-      alpha: Math.random()*.7+.1,
-      r: colors[0] + Math.floor(Math.random()*(colors[3]-colors[0])),
-      g: colors[1] + Math.floor(Math.random()*(colors[4]-colors[1])),
-      b: colors[2] + Math.floor(Math.random()*(colors[5]-colors[2])),
+    setTimeout(() => {
+      canvas.style.transition = 'all 2.5s cubic-bezier(0.16, 1, 0.3, 1)';
+      canvas.style.opacity = '1';
+      canvas.style.transform = 'rotateX(55deg) rotateZ(-25deg) scale(1)';
+    }, 300);
+
+    window.addEventListener('mousemove', (e) => {
+      const heroEl = document.getElementById('hero');
+      const rect = heroEl.getBoundingClientRect();
+      if (rect.bottom < 0 || rect.top > window.innerHeight) return;
+
+      const x = (window.innerWidth  / 2 - e.pageX) / 25;
+      const y = (window.innerHeight / 2 - e.pageY) / 25;
+
+      canvas.style.transform = `rotateX(${55 + y / 2}deg) rotateZ(${-25 + x / 2}deg)`;
+
+      layers.forEach((layer, i) => {
+        const moveX = x * (i + 1) * 0.2;
+        const moveY = y * (i + 1) * 0.2;
+        const depth  = (i + 1) * 15;
+        layer.style.transform = `translateZ(${depth}px) translate(${moveX}px, ${moveY}px)`;
+      });
     });
-  }
-
-  let phase = idx * 37;
-  function drawCard(){
-    const cw = canvas.width, ch = canvas.height;
-    ctx.fillStyle = 'rgba(8,8,14,0.15)';
-    ctx.fillRect(0,0,cw,ch);
-    phase += 0.005;
-    pts.forEach(p => {
-      p.x += p.vx + Math.sin(phase + p.y*0.008)*0.3;
-      p.y += p.vy + Math.cos(phase + p.x*0.008)*0.3;
-      if(p.x<0) p.x=cw; if(p.x>cw) p.x=0;
-      if(p.y<0) p.y=ch; if(p.y>ch) p.y=0;
-      ctx.beginPath();
-      ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
-      ctx.fillStyle=`rgba(${p.r},${p.g},${p.b},${p.alpha})`;
-      ctx.fill();
-    });
-    // draw flowing lines between nearby particles
-    ctx.lineWidth = .3;
-    for(let i=0;i<pts.length;i++){
-      for(let j=i+1;j<pts.length;j++){
-        const dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y;
-        const dist=Math.sqrt(dx*dx+dy*dy);
-        if(dist<60){
-          const a = (1-dist/60)*0.15;
-          ctx.strokeStyle=`rgba(${pts[i].r},${pts[i].g},${pts[i].b},${a})`;
-          ctx.beginPath();
-          ctx.moveTo(pts[i].x,pts[i].y);
-          ctx.lineTo(pts[j].x,pts[j].y);
-          ctx.stroke();
-        }
-      }
-    }
-    requestAnimationFrame(drawCard);
-  }
-  drawCard();
-});
-
-// ── SCROLL REVEAL ──
-const revealEls = document.querySelectorAll('.reveal');
-const obs = new IntersectionObserver(entries => {
-  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
-}, { threshold: 0.15 });
-revealEls.forEach(el => obs.observe(el));
-</script>
+  </script>
 </body>
 </html>

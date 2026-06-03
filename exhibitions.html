@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Exhibitions — Jagadish Bananki</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Space+Mono&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --bg: #0a0a0a; --silver: #e0e0e0; --accent: #ff3c00; --grain-opacity: 0.15; }
+    html { scroll-behavior: smooth; }
+    body { background-color: var(--bg); color: var(--silver); font-family: 'Syncopate', sans-serif; overflow-x: hidden; }
+
+    .halide-grain { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 200; opacity: var(--grain-opacity); filter: url(#grain); }
+
+    .nav { position: fixed; top: 0; left: 0; right: 0; padding: 2.5rem 4rem; display: flex; justify-content: space-between; align-items: flex-start; z-index: 100; pointer-events: none; }
+    .brand { font-weight: 700; font-size: 0.75rem; letter-spacing: 0.2em; }
+    .brand a { color: var(--silver); text-decoration: none; pointer-events: auto; }
+    .brand a:hover { opacity: 0.6; }
+    .nav-links { text-align: right; font-family: 'Space Mono', monospace; font-size: 0.7rem; line-height: 2; pointer-events: auto; }
+    .nav-links a { display: block; color: var(--accent); text-decoration: none; letter-spacing: 0.15em; transition: opacity 0.2s; }
+    .nav-links a:hover { opacity: 0.6; }
+    .nav-links a.active { border-bottom: 1px solid var(--accent); }
+
+    /* ── Static hero ── */
+    .page-hero {
+      position: relative;
+      width: 100vw;
+      height: 40vh;
+      min-height: 260px;
+      display: flex;
+      align-items: flex-end;
+      overflow: hidden;
+      background-color: var(--bg);
+    }
+
+    .page-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        repeating-radial-gradient(circle at 70% 40%, transparent 0, transparent 60px, rgba(255,255,255,0.04) 61px, transparent 62px),
+        repeating-linear-gradient(0deg, transparent, transparent 79px, rgba(255,255,255,0.02) 80px),
+        repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(255,255,255,0.02) 80px);
+    }
+
+    .page-hero-inner {
+      position: relative;
+      z-index: 2;
+      padding: 4rem;
+      width: 100%;
+    }
+
+    .page-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+
+    .page-title {
+      font-size: clamp(3rem, 10vw, 9rem);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 0.85;
+    }
+
+    /* ── Image spotlight strip ── */
+    .spotlight-strip {
+      position: relative;
+      width: 100vw;
+      background: var(--bg);
+      padding: 6rem 4rem 5rem;
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+    }
+
+    .spotlight-card {
+      position: relative;
+      width: 300px;
+      height: 400px;
+      flex-shrink: 0;
+      overflow: hidden;
+      border-radius: 3px;
+      border: 1px solid rgba(224,224,224,0.07);
+      cursor: none;
+      transition: transform 0.25s ease-out;
+      transform-style: preserve-3d;
+    }
+
+    .spotlight-card img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    /* Blurred base layer */
+    .sp-img-blur {
+      filter: blur(6px) brightness(0.7);
+      z-index: 1;
+    }
+
+    /* Sharp layer revealed by spotlight mask */
+    .sp-img-sharp {
+      z-index: 2;
+      --mx: 50%;
+      --my: 50%;
+      --sz: 80px;
+      mask-image: radial-gradient(circle at var(--mx) var(--my), black calc(var(--sz) * 0.4), transparent calc(var(--sz) * 1.6));
+      -webkit-mask-image: radial-gradient(circle at var(--mx) var(--my), black calc(var(--sz) * 0.4), transparent calc(var(--sz) * 1.6));
+    }
+
+    /* Dark overlay with spotlight hole */
+    .sp-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      background: rgba(0,0,0,0.62);
+      pointer-events: none;
+      --mx: 50%;
+      --my: 50%;
+      --sz: 80px;
+      mask-image: radial-gradient(circle at var(--mx) var(--my), transparent calc(var(--sz) * 0.4), black calc(var(--sz) * 1.6));
+      -webkit-mask-image: radial-gradient(circle at var(--mx) var(--my), transparent calc(var(--sz) * 0.4), black calc(var(--sz) * 1.6));
+      transition: mask-image 0.08s, -webkit-mask-image 0.08s;
+    }
+
+    /* Caption */
+    .sp-caption {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      z-index: 4;
+      padding: 1rem 1.1rem 0.9rem;
+      pointer-events: none;
+    }
+    .sp-caption-title {
+      font-family: 'Syncopate', sans-serif;
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: #fff;
+      margin-bottom: 0.2rem;
+    }
+    .sp-caption-sub {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.5rem;
+      letter-spacing: 0.15em;
+      color: rgba(255,255,255,0.45);
+    }
+
+    .section { position: relative; width: 100vw; background-color: var(--bg); overflow: hidden; }
+    .section::before {
+      content: ''; position: absolute; inset: 0;
+      background-image:
+        repeating-radial-gradient(circle at 50% 50%, transparent 0, transparent 60px, rgba(255,255,255,0.03) 61px, transparent 62px),
+        repeating-linear-gradient(0deg, transparent, transparent 79px, rgba(255,255,255,0.02) 80px),
+        repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(255,255,255,0.02) 80px);
+      pointer-events: none;
+    }
+
+    .section-inner { position: relative; z-index: 2; max-width: 900px; width: 100%; padding: 6rem 4rem; margin: 0 auto; }
+    .section-subtitle { font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 0.3em; color: var(--accent); margin-bottom: 2rem; }
+    .section-heading {
+      font-size: clamp(1.5rem, 3vw, 2.5rem); font-weight: 700; letter-spacing: -0.03em; line-height: 0.9;
+      margin-bottom: 3rem; border-bottom: 1px solid rgba(224,224,224,0.1); padding-bottom: 2rem;
+    }
+
+    .exhibition-list { display: flex; flex-direction: column; }
+    .exhibition-item {
+      display: grid;
+      grid-template-columns: 80px 1fr auto;
+      gap: 2rem;
+      align-items: baseline;
+      padding: 1.5rem 0;
+      border-bottom: 1px solid rgba(224,224,224,0.06);
+      font-family: 'Space Mono', monospace;
+      transition: background 0.2s;
+    }
+    .exhibition-item:hover { background: rgba(255,60,0,0.03); }
+
+    .ex-year  { font-size: 0.65rem; color: var(--accent); letter-spacing: 0.1em; }
+    .ex-title { font-size: 0.75rem; letter-spacing: 0.05em; color: var(--silver); margin-bottom: 0.25rem; }
+    .ex-venue { font-size: 0.65rem; color: rgba(224,224,224,0.4); }
+    .ex-type  {
+      font-size: 0.55rem; letter-spacing: 0.2em;
+      padding: 0.25rem 0.6rem;
+      border: 1px solid rgba(255,60,0,0.3);
+      color: var(--accent); white-space: nowrap;
+      align-self: center;
+    }
+  </style>
+<body>
+
+  <svg style="position:absolute;width:0;height:0">
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" />
+      <feColorMatrix type="saturate" values="0" />
+    </filter>
+  </svg>
+  <div class="halide-grain"></div>
+
+  <nav class="nav">
+    <div class="brand"><a href="index.html">ARTIST | SCULPTOR</a></div>
+    <div class="nav-links">
+      <a href="about.html">ABOUT THE ARTIST</a>
+      <a href="works.html">WORKS</a>
+      <a href="exhibitions.html" class="active">EXHIBITIONS</a>
+      <a href="events.html">EVENTS, PRESS &amp; MEDIA</a>
+      <a href="index.html#contact">CONTACT</a>
+    </div>
+  </nav>
+
+  <!-- Static hero -->
+  <div class="page-hero">
+    <div class="page-hero-inner">
+      <p class="page-label">[ SHOWS &amp; EXHIBITIONS ]</p>
+      <h1 class="page-title">EXHIBITIONS</h1>
+    </div>
+  </div>
+
+  <!-- Spotlight strip -->
+  <div class="spotlight-strip">
+
+    <div class="spotlight-card" data-spotlight>
+      <img class="sp-img-blur" src="https://images.unsplash.com/photo-1554907984-15263bfd63bd?auto=format&fit=crop&q=80&w=600" alt="Form & Void" />
+      <img class="sp-img-sharp" src="https://images.unsplash.com/photo-1554907984-15263bfd63bd?auto=format&fit=crop&q=80&w=600" alt="" />
+      <div class="sp-overlay"></div>
+      <div class="sp-caption">
+        <p class="sp-caption-title">FORM &amp; VOID</p>
+        <p class="sp-caption-sub">GALLERY MERIDIAN — BERLIN 2026</p>
+      </div>
+    </div>
+
+    <div class="spotlight-card" data-spotlight>
+      <img class="sp-img-blur" src="https://images.unsplash.com/photo-1518998053901-5348d3961a04?auto=format&fit=crop&q=80&w=600" alt="Mineral Time" />
+      <img class="sp-img-sharp" src="https://images.unsplash.com/photo-1518998053901-5348d3961a04?auto=format&fit=crop&q=80&w=600" alt="" />
+      <div class="sp-overlay"></div>
+      <div class="sp-caption">
+        <p class="sp-caption-title">MINERAL TIME</p>
+        <p class="sp-caption-sub">HAUSER &amp; COLLECTIVE — ZÜRICH 2026</p>
+      </div>
+    </div>
+
+    <div class="spotlight-card" data-spotlight>
+      <img class="sp-img-blur" src="https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?auto=format&fit=crop&q=80&w=600" alt="Topographical Light" />
+      <img class="sp-img-sharp" src="https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?auto=format&fit=crop&q=80&w=600" alt="" />
+      <div class="sp-overlay"></div>
+      <div class="sp-caption">
+        <p class="sp-caption-title">TOPOGRAPHICAL LIGHT</p>
+        <p class="sp-caption-sub">STUDIO NOVA — MUMBAI 2026</p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-divider"></div>
+  <section class="section">
+    <div class="section-inner">
+      <p class="section-subtitle">[ UPCOMING ]</p>
+      <h2 class="section-heading">2026</h2>
+      <div class="exhibition-list">
+        <div class="exhibition-item">
+          <div class="ex-year">SEPT 2026</div>
+          <div class="ex-info">
+            <div class="ex-title">FORM &amp; VOID</div>
+            <div class="ex-venue">Gallery Meridian, Berlin</div>
+          </div>
+          <div class="ex-type">GROUP</div>
+        </div>
+        <div class="exhibition-item">
+          <div class="ex-year">NOV 2026</div>
+          <div class="ex-info">
+            <div class="ex-title">MINERAL TIME</div>
+            <div class="ex-venue">Hauser &amp; Collective, Zürich</div>
+          </div>
+          <div class="ex-type">SOLO</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- Past -->
+  <section class="section">
+    <div class="section-inner">
+      <p class="section-subtitle">[ PAST ]</p>
+      <h2 class="section-heading">2020 — 2026</h2>
+      <div class="exhibition-list">
+        <div class="exhibition-item">
+          <div class="ex-year">JAN 2026</div>
+          <div class="ex-info">
+            <div class="ex-title">TOPOGRAPHICAL LIGHT</div>
+            <div class="ex-venue">Studio Nova, Mumbai</div>
+          </div>
+          <div class="ex-type">SOLO</div>
+        </div>
+        <div class="exhibition-item">
+          <div class="ex-year">2025</div>
+          <div class="ex-info">
+            <div class="ex-title">SURFACE TENSION</div>
+            <div class="ex-venue">Whitefield Gallery, London</div>
+          </div>
+          <div class="ex-type">GROUP</div>
+        </div>
+        <div class="exhibition-item">
+          <div class="ex-year">2024</div>
+          <div class="ex-info">
+            <div class="ex-title">MATERIAL MEMORY</div>
+            <div class="ex-venue">Kunsthalle Basel</div>
+          </div>
+          <div class="ex-type">SOLO</div>
+        </div>
+        <div class="exhibition-item">
+          <div class="ex-year">2023</div>
+          <div class="ex-info">
+            <div class="ex-title">DEPTH &amp; GROUND</div>
+            <div class="ex-venue">Kochi-Muziris Biennale</div>
+          </div>
+          <div class="ex-type">GROUP</div>
+        </div>
+        <div class="exhibition-item">
+          <div class="ex-year">2022</div>
+          <div class="ex-info">
+            <div class="ex-title">VOID STUDIES</div>
+            <div class="ex-venue">National Gallery of Modern Art, New Delhi</div>
+          </div>
+          <div class="ex-type">SOLO</div>
+        </div>
+        <div class="exhibition-item">
+          <div class="ex-year">2020</div>
+          <div class="ex-info">
+            <div class="ex-title">STRATA</div>
+            <div class="ex-venue">Devi Art Foundation, Gurugram</div>
+          </div>
+          <div class="ex-type">GROUP</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    document.querySelectorAll('[data-spotlight]').forEach(card => {
+      const sharp   = card.querySelector('.sp-img-sharp');
+      const overlay = card.querySelector('.sp-overlay');
+      const SZ      = 80;
+
+      card.addEventListener('mousemove', e => {
+        const rect = card.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width)  * 100;
+        const y = ((e.clientY - rect.top)  / rect.height) * 100;
+
+        const mx = x + '%', my = y + '%';
+        const mask = `radial-gradient(circle at ${mx} ${my}, black ${SZ * 0.4}px, transparent ${SZ * 1.6}px)`;
+        const maskInv = `radial-gradient(circle at ${mx} ${my}, transparent ${SZ * 0.4}px, black ${SZ * 1.6}px)`;
+
+        sharp.style.maskImage = mask;
+        sharp.style.webkitMaskImage = mask;
+        overlay.style.maskImage = maskInv;
+        overlay.style.webkitMaskImage = maskInv;
+
+        /* 3D tilt */
+        const rotY = ((x - 50) / 50) * 8;
+        const rotX = ((50 - y) / 50) * 8;
+        card.style.transform = `perspective(1000px) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+      });
+
+      card.addEventListener('mouseleave', () => {
+        const center = `radial-gradient(circle at 50% 50%, black ${SZ * 0.4}px, transparent ${SZ * 1.6}px)`;
+        const centerInv = `radial-gradient(circle at 50% 50%, transparent ${SZ * 0.4}px, black ${SZ * 1.6}px)`;
+        sharp.style.maskImage = center;
+        sharp.style.webkitMaskImage = center;
+        overlay.style.maskImage = centerInv;
+        overlay.style.webkitMaskImage = centerInv;
+        card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
+      });
+    });
+  </script>
+</body>
+</html>
